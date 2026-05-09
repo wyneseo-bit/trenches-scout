@@ -19,15 +19,21 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'OPENAI_API_KEY not configured' })
   }
 
+  if (agents.length === 0) {
+    return res.status(500).json({ error: 'No agents fetched from ACP API' })
+  }
+
   const prompt = `You are an AI agent matchmaker for Virtuals Protocol's ACP (Agent Commerce Protocol).
 
 User wants: "${query}"
 
-Agents (infer function from name + metrics. e.g. "Trade Execution"=DeFi, "Luna"=entertainment, "Director"=content, "Nox"=utility):
+Here are the available agents (infer their function from the name and metrics):
 ${JSON.stringify(agents)}
 
-Return the 5 best matches. ONLY valid JSON array, no markdown:
-[{"id":number,"category":"DeFi|Content|Analytics|Social|Utility|Trading","reason":"one sentence why this matches the user need"}]`
+Pick the 5 best matches for the user's need. Return ONLY a raw JSON array with no markdown, no code blocks:
+[{"id":84,"category":"DeFi","reason":"one sentence why this agent matches"},...]
+
+Valid categories: DeFi, Trading, Content, Social, Analytics, Utility`
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -39,8 +45,14 @@ Return the 5 best matches. ONLY valid JSON array, no markdown:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
+        temperature: 0.3,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a JSON-only API. You return only raw JSON arrays with no markdown, no code blocks, no explanation.',
+          },
+          { role: 'user', content: prompt },
+        ],
       }),
     })
 
@@ -55,12 +67,17 @@ Return the 5 best matches. ONLY valid JSON array, no markdown:
     let matches
     try {
       const parsed = JSON.parse(text)
-      // handle both {matches:[...]} and [...] responses
-      matches = Array.isArray(parsed) ? parsed : parsed.matches ?? parsed.results ?? Object.values(parsed)[0]
+      matches = Array.isArray(parsed)
+        ? parsed
+        : parsed.matches ?? parsed.results ?? parsed.agents ?? Object.values(parsed)[0]
     } catch {
-      const jsonMatch = text.match(/\[[\s\S]*\]/)
-      if (!jsonMatch) throw new Error('No JSON array found in response')
+      const jsonMatch = text.match(/\[[\s\S]*?\]/)
+      if (!jsonMatch) throw new Error(`Could not parse AI response: ${text.slice(0, 200)}`)
       matches = JSON.parse(jsonMatch[0])
+    }
+
+    if (!Array.isArray(matches) || matches.length === 0) {
+      throw new Error('AI returned no matches')
     }
 
     return res.status(200).json({ matches })

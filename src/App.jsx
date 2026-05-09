@@ -469,7 +469,16 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
 
       {/* Card stack */}
       <div style={{ position: 'relative', width: '100%', maxWidth: 420, height: 370 }}>
-        {deck.length === 0 ? null : visibleDeck.map((match, i) => {
+        {deck.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12 }}>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 16, color: C.textMuted }}>No matches found</div>
+            <button onClick={onNewSearch} style={{
+              background: C.lime, border: 'none', borderRadius: 8, padding: '10px 20px',
+              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
+              color: '#0A0A0A', cursor: 'pointer', letterSpacing: 1,
+            }}>TRY AGAIN</button>
+          </div>
+        ) : visibleDeck.map((match, i) => {
           const agent = agentMap[match.id]
           if (!agent) return null
           return (
@@ -615,7 +624,7 @@ export default function App() {
 
   async function fetchAgents() {
     const sortKeys = ['volume', 'revenue', 'successRate']
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       sortKeys.map((sortBy) =>
         fetch(
           `https://acpx.virtuals.io/api/metrics/agents?page=1&pageSize=30&sortBy=${sortBy}&sortOrder=desc`
@@ -627,15 +636,21 @@ export default function App() {
     )
     const seen = new Set()
     const all = []
-    for (const res of results) {
-      const items = Array.isArray(res) ? res : res.data ?? res.agents ?? res.results ?? []
+    for (const result of results) {
+      if (result.status !== 'fulfilled') continue
+      const res = result.value
+      // handle various response shapes
+      const items = Array.isArray(res)
+        ? res
+        : res.data ?? res.agents ?? res.results ?? res.items ?? res.list ?? []
       for (const agent of items) {
-        if (!seen.has(agent.id)) {
+        if (agent?.id != null && !seen.has(agent.id)) {
           seen.add(agent.id)
           all.push(agent)
         }
       }
     }
+    if (all.length === 0) throw new Error('No agents returned from ACP API. The API may be down or blocking requests.')
     return all
   }
 
