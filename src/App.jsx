@@ -2,30 +2,30 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
-  bg: '#06060A',
-  surface: '#0D0D16',
-  surface2: '#121220',
-  border: '#1A1A2C',
-  border2: '#1C1C2E',
-  teal: '#00DDB3',
-  textPrimary: '#EEEEF5',
-  textMuted: '#6B6B8A',
-  textFaint: '#2C2C44',
-  green: '#00FF87',
-  red: '#FF4466',
+  bg: '#0A0A0A',
+  surface: '#111111',
+  surface2: '#1A1A1A',
+  border: '#222222',
+  border2: '#2A2A2A',
+  lime: '#C3FF50',
+  textPrimary: '#FFFFFF',
+  textMuted: '#888888',
+  textFaint: '#444444',
+  green: '#C3FF50',
+  red: '#FF4444',
 }
 
 const CATEGORY_COLORS = {
-  DeFi: '#00E5C8',
-  Trading: '#00B4FF',
-  Content: '#FF6B9D',
-  Social: '#FFB347',
-  Analytics: '#A78BFA',
-  Utility: '#6EE7B7',
+  DeFi: '#C3FF50',
+  Trading: '#C3FF50',
+  Content: '#C3FF50',
+  Social: '#C3FF50',
+  Analytics: '#C3FF50',
+  Utility: '#C3FF50',
 }
 
 function catColor(cat) {
-  return CATEGORY_COLORS[cat] || C.teal
+  return C.lime
 }
 
 // ─── Formatters ──────────────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
         width: '100%',
         background: C.surface,
         border: `1px solid ${C.border2}`,
-        borderRadius: 20,
+        borderRadius: 12,
         padding: '20px 20px 16px',
         cursor: isTop ? 'grab' : 'default',
         userSelect: 'none',
@@ -154,52 +154,45 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
         overflow: 'hidden',
       }}
     >
-      {/* Category glow */}
-      <div style={{
-        position: 'absolute', top: 0, right: 0, width: 160, height: 160,
-        background: `radial-gradient(circle at top right, ${color}22, transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
-
       {/* SAVE overlay */}
       <div style={{
-        position: 'absolute', inset: 0, borderRadius: 20,
-        background: `${C.green}18`,
-        border: `2px solid ${C.green}`,
+        position: 'absolute', inset: 0, borderRadius: 12,
+        background: `${C.lime}12`,
+        border: `2px solid ${C.lime}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         opacity: saveOpacity, pointerEvents: 'none', transition: 'opacity 0.1s',
         zIndex: 10,
       }}>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 32, color: C.green, letterSpacing: 4 }}>SAVE</span>
+        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.lime, letterSpacing: 6 }}>SAVE</span>
       </div>
 
       {/* SKIP overlay */}
       <div style={{
-        position: 'absolute', inset: 0, borderRadius: 20,
-        background: `${C.red}18`,
+        position: 'absolute', inset: 0, borderRadius: 12,
+        background: `${C.red}12`,
         border: `2px solid ${C.red}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         opacity: skipOpacity, pointerEvents: 'none', transition: 'opacity 0.1s',
         zIndex: 10,
       }}>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 32, color: C.red, letterSpacing: 4 }}>SKIP</span>
+        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.red, letterSpacing: 6 }}>SKIP</span>
       </div>
 
       {/* Counter */}
       <div style={{
         position: 'absolute', top: 16, right: 20,
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: C.textMuted, fontWeight: 600,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: C.textFaint, fontWeight: 600,
       }}>
         {index === 0 ? `${total - index} / ${total}` : ''}
       </div>
 
       {/* Header */}
-      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 16 }}>
         {/* Avatar */}
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <div style={{
-            width: 62, height: 62, borderRadius: '50%',
-            border: `2px solid ${color}`,
+            width: 56, height: 56, borderRadius: 8,
+            border: `1px solid ${C.border2}`,
             background: C.surface2,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             overflow: 'hidden',
@@ -212,29 +205,29 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 22, color }}>
+              <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 20, color: C.textMuted }}>
                 {agent.name?.[0] ?? '?'}
               </span>
             )}
           </div>
           <div style={{
-            position: 'absolute', bottom: 2, right: 2,
-            width: 12, height: 12, borderRadius: '50%',
+            position: 'absolute', bottom: -3, right: -3,
+            width: 10, height: 10, borderRadius: '50%',
             background: successDot, border: `2px solid ${C.surface}`,
           }} />
         </div>
 
         {/* Name + badge + reason */}
         <div style={{ flex: 1, minWidth: 0, paddingRight: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-            <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 5 }}>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary }}>
               {agent.name}
             </span>
             {matchInfo?.category && (
               <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fontWeight: 700,
-                color: color, background: `${color}18`,
-                border: `1px solid ${color}44`,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fontWeight: 600,
+                color: C.textMuted,
+                border: `1px solid ${C.border2}`,
                 borderRadius: 4, padding: '2px 6px', letterSpacing: 1, textTransform: 'uppercase',
               }}>
                 {matchInfo.category}
@@ -252,7 +245,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
       {/* Metrics grid */}
       <div style={{
         display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
-        gap: 1, background: C.border, borderRadius: 10, overflow: 'hidden',
+        gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden',
         marginBottom: 14,
       }}>
         {[
@@ -264,7 +257,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
           <div key={label} style={{
             background: C.surface2, padding: '10px 8px', textAlign: 'center',
           }}>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
               {label}
             </div>
             <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textPrimary, fontWeight: 700 }}>
@@ -288,10 +281,10 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           style={{
-            fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700,
-            color: C.teal, border: `1px solid ${C.teal}44`, borderRadius: 8,
-            padding: '6px 14px', textDecoration: 'none', letterSpacing: 1,
-            background: `${C.teal}0D`,
+            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
+            color: '#0A0A0A', background: C.lime,
+            borderRadius: 6, padding: '6px 14px', textDecoration: 'none', letterSpacing: 1,
+            border: 'none',
           }}
         >
           VIEW →
@@ -314,9 +307,9 @@ function LoadingScreen() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 24 }}>
       <div style={{
-        width: 44, height: 44, borderRadius: '50%',
-        border: `3px solid ${C.border2}`,
-        borderTop: `3px solid ${C.teal}`,
+        width: 40, height: 40, borderRadius: '50%',
+        border: `2px solid ${C.border2}`,
+        borderTop: `2px solid ${C.lime}`,
         animation: 'spin 0.8s linear infinite',
       }} />
       <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, letterSpacing: 1 }}>
@@ -343,33 +336,32 @@ function SearchScreen({ onSearch }) {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <div style={{ width: '100%', maxWidth: 460 }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 44 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
           <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'linear-gradient(135deg, #00DDB3, #0055FF)',
+            width: 32, height: 32, borderRadius: 8,
+            background: C.lime,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18,
+            fontSize: 16, fontWeight: 800, color: '#0A0A0A',
+            fontFamily: 'Inter,system-ui,sans-serif',
           }}>⬡</div>
           <div>
-            <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 15, color: C.textPrimary, letterSpacing: 2 }}>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
               TRENCHES SCOUT
             </div>
             <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>
-              POWERED BY VIRTUALS ACP · LIVE DATA
+              ACP EXPLORER · LIVE DATA
             </div>
           </div>
         </div>
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 36,
-          lineHeight: 1.15, marginBottom: 12,
-          background: 'linear-gradient(135deg, #EEEEF5 30%, #00DDB3)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 38,
+          lineHeight: 1.1, marginBottom: 14, color: C.textPrimary, letterSpacing: -1,
         }}>
-          Find your perfect agent
+          Find your <span style={{ color: C.lime }}>perfect</span> agent
         </h1>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: 28, lineHeight: 1.6 }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: 32, lineHeight: 1.65 }}>
           Describe what you need in plain English. Scout matches you with the best live ACP agents — no filters, no guessing.
         </p>
 
@@ -381,12 +373,12 @@ function SearchScreen({ onSearch }) {
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
           placeholder="e.g. I need an agent that automates my DeFi trades..."
           style={{
-            width: '100%', background: C.surface, border: `1.5px solid ${query ? C.teal + '88' : C.border2}`,
-            borderRadius: 12, padding: '14px 16px',
+            width: '100%', background: C.surface, border: `1px solid ${query ? C.lime + 'AA' : C.border2}`,
+            borderRadius: 8, padding: '14px 16px',
             fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textPrimary,
             resize: 'none', outline: 'none', lineHeight: 1.6,
-            boxShadow: query ? `0 0 0 3px ${C.teal}18` : 'none',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
+            boxShadow: query ? `0 0 0 3px ${C.lime}18` : 'none',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
           }}
         />
 
@@ -395,28 +387,31 @@ function SearchScreen({ onSearch }) {
           onClick={submit}
           disabled={!query.trim()}
           style={{
-            width: '100%', marginTop: 12, padding: '14px',
-            background: query.trim() ? 'linear-gradient(135deg, #00DDB3, #0055FF)' : C.surface2,
-            border: 'none', borderRadius: 12, cursor: query.trim() ? 'pointer' : 'not-allowed',
-            fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 15,
-            color: query.trim() ? '#06060A' : C.textFaint, letterSpacing: 2,
-            transition: 'background 0.2s, color 0.2s',
+            width: '100%', marginTop: 10, padding: '14px',
+            background: query.trim() ? C.lime : C.surface2,
+            border: 'none', borderRadius: 8, cursor: query.trim() ? 'pointer' : 'not-allowed',
+            fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+            color: query.trim() ? '#0A0A0A' : C.textFaint, letterSpacing: 2,
+            transition: 'background 0.15s, color 0.15s',
           }}
         >
           SCOUT AGENTS
         </button>
 
         {/* Chips */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
           {chips.map((chip) => (
             <button
               key={chip}
               onClick={() => setQuery(chip)}
               style={{
-                background: C.surface2, border: `1px solid ${C.border2}`,
-                borderRadius: 20, padding: '6px 14px', cursor: 'pointer',
+                background: 'none', border: `1px solid ${C.border2}`,
+                borderRadius: 6, padding: '6px 12px', cursor: 'pointer',
                 fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted,
+                transition: 'border-color 0.15s, color 0.15s',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
             >
               {chip}
             </button>
@@ -457,12 +452,11 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
       <div style={{ width: '100%', maxWidth: 420, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <button onClick={onNewSearch} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.teal, fontWeight: 700, letterSpacing: 1,
+          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1,
         }}>← NEW SEARCH</button>
         <div style={{
-          background: C.surface2, border: `1px solid ${C.border2}`,
-          borderRadius: 20, padding: '4px 12px',
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.green, fontWeight: 700,
+          background: C.lime, borderRadius: 6, padding: '4px 12px',
+          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: '#0A0A0A', fontWeight: 700,
         }}>
           {saved.length} SAVED
         </div>
@@ -494,23 +488,27 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
 
       {/* Action buttons */}
       {deck.length > 0 && (
-        <div style={{ display: 'flex', gap: 24, marginTop: 32 }}>
+        <div style={{ display: 'flex', gap: 16, marginTop: 32 }}>
           <button
             onClick={() => handleSwipe('left')}
             style={{
-              width: 58, height: 58, borderRadius: '50%',
-              background: `${C.red}18`, border: `1.5px solid ${C.red}66`,
-              cursor: 'pointer', fontSize: 22, color: C.red,
+              width: 56, height: 56, borderRadius: 8,
+              background: 'none', border: `1px solid ${C.border2}`,
+              cursor: 'pointer', fontSize: 20, color: C.textMuted,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'border-color 0.15s, color 0.15s',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.color = C.red }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
           >✕</button>
           <button
             onClick={() => handleSwipe('right')}
             style={{
-              width: 58, height: 58, borderRadius: '50%',
-              background: `${C.green}18`, border: `1.5px solid ${C.green}66`,
-              cursor: 'pointer', fontSize: 22, color: C.green,
+              width: 56, height: 56, borderRadius: 8,
+              background: C.lime, border: 'none',
+              cursor: 'pointer', fontSize: 20, color: '#0A0A0A',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 700,
             }}
           >✓</button>
         </div>
@@ -525,82 +523,79 @@ function DoneScreen({ saved, onRestart }) {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
           <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: 'linear-gradient(135deg, #00DDB3, #0055FF)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+            width: 32, height: 32, borderRadius: 8,
+            background: C.lime,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, color: '#0A0A0A',
           }}>⬡</div>
-          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 15, color: C.textPrimary, letterSpacing: 2 }}>
+          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
             TRENCHES SCOUT
           </span>
         </div>
 
-        <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 26, color: C.textPrimary, marginBottom: 8 }}>
+        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.textPrimary, marginBottom: 8, letterSpacing: -0.5 }}>
           Your shortlist
         </h2>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: 28 }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: 24 }}>
           {saved.length === 0
             ? 'No agents saved this round. Try a new search!'
-            : `You saved ${saved.length} agent${saved.length > 1 ? 's' : ''}. Check them out below.`}
+            : `${saved.length} agent${saved.length > 1 ? 's' : ''} saved. Ready to hire.`}
         </p>
 
         {/* Saved list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-          {saved.map((agent) => {
-            const color = catColor(agent.matchInfo?.category)
-            return (
-              <div key={agent.id} style={{
-                background: C.surface, border: `1px solid ${C.border2}`,
-                borderRadius: 14, padding: '14px 16px',
-                display: 'flex', gap: 14, alignItems: 'center',
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+          {saved.map((agent) => (
+            <div key={agent.id} style={{
+              background: C.surface, border: `1px solid ${C.border2}`,
+              borderRadius: 8, padding: '14px 16px',
+              display: 'flex', gap: 12, alignItems: 'center',
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 6,
+                border: `1px solid ${C.border2}`, background: C.surface2,
+                overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
               }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: '50%',
-                  border: `2px solid ${color}`, background: C.surface2,
-                  overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  {agent.profilePic ? (
-                    <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                  ) : (
-                    <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 18, color }}>{agent.name?.[0]}</span>
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, marginBottom: 3 }}>
-                    {agent.name}
-                  </div>
-                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.4 }}>
-                    {agent.matchInfo?.reason}
-                  </div>
-                </div>
-                <a
-                  href={agentUrl(agent)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
-                    color: C.teal, border: `1px solid ${C.teal}44`, borderRadius: 8,
-                    padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
-                    background: `${C.teal}0D`,
-                  }}
-                >
-                  VIEW →
-                </a>
+                {agent.profilePic ? (
+                  <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                ) : (
+                  <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
+                )}
               </div>
-            )
-          })}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 2 }}>
+                  {agent.name}
+                </div>
+                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.4 }}>
+                  {agent.matchInfo?.reason}
+                </div>
+              </div>
+              <a
+                href={agentUrl(agent)}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
+                  color: '#0A0A0A', background: C.lime,
+                  borderRadius: 6, padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
+                }}
+              >
+                VIEW →
+              </a>
+            </div>
+          ))}
         </div>
 
         <button
           onClick={onRestart}
           style={{
             width: '100%', padding: '14px',
-            background: 'linear-gradient(135deg, #00DDB3, #0055FF)',
-            border: 'none', borderRadius: 12, cursor: 'pointer',
-            fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 15,
-            color: '#06060A', letterSpacing: 2,
+            background: C.lime,
+            border: 'none', borderRadius: 8, cursor: 'pointer',
+            fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+            color: '#0A0A0A', letterSpacing: 2,
           }}
         >
           SCOUT AGAIN
