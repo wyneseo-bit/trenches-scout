@@ -14,9 +14,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing query or agents' })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' })
+    return res.status(500).json({ error: 'OPENAI_API_KEY not configured' })
   }
 
   const prompt = `You are an AI agent matchmaker for Virtuals Protocol's ACP (Agent Commerce Protocol).
@@ -30,31 +30,33 @@ Return the 5 best matches. ONLY valid JSON array, no markdown:
 [{"id":number,"category":"DeFi|Content|Analytics|Social|Utility|Trading","reason":"one sentence why this matches the user need"}]`
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'gpt-4o-mini',
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
       }),
     })
 
     if (!response.ok) {
       const err = await response.text()
-      return res.status(502).json({ error: 'Anthropic API error', detail: err })
+      return res.status(502).json({ error: 'OpenAI API error', detail: err })
     }
 
     const data = await response.json()
-    const text = data.content[0].text.trim()
+    const text = data.choices[0].message.content.trim()
 
     let matches
     try {
-      matches = JSON.parse(text)
+      const parsed = JSON.parse(text)
+      // handle both {matches:[...]} and [...] responses
+      matches = Array.isArray(parsed) ? parsed : parsed.matches ?? parsed.results ?? Object.values(parsed)[0]
     } catch {
       const jsonMatch = text.match(/\[[\s\S]*\]/)
       if (!jsonMatch) throw new Error('No JSON array found in response')
