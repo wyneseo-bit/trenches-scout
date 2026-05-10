@@ -1334,6 +1334,14 @@ function HistoryScreen({ onBack }) {
     setSelected(new Map())
   }
 
+  function handleExpand(sessionId) {
+    setExpanded((prev) => {
+      const next = prev === sessionId ? null : sessionId
+      setSelected(new Map()) // clear selections whenever switching or closing
+      return next
+    })
+  }
+
   function toggleSelect(agent) {
     setSelected((prev) => {
       const next = new Map(prev)
@@ -1371,7 +1379,7 @@ function HistoryScreen({ onBack }) {
         </div>
 
         <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
-          TAP AGENTS TO SELECT · COMPARE UP TO 4 ACROSS SESSIONS
+          OPEN A SESSION · TAP AGENTS TO SELECT · COMPARE UP TO 4
         </div>
 
         {/* Sessions */}
@@ -1380,7 +1388,7 @@ function HistoryScreen({ onBack }) {
             <div key={session.id} style={{ background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 10, overflow: 'hidden' }}>
               {/* Session header */}
               <button
-                onClick={() => setExpanded(expanded === session.id ? null : session.id)}
+                onClick={() => handleExpand(session.id)}
                 style={{
                   width: '100%', background: 'none', border: 'none', cursor: 'pointer',
                   padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, textAlign: 'left',
