@@ -793,10 +793,248 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
   )
 }
 
+// ─── Compare Modal ─────────────────────────────────────────────────────────────
+function CompareModal({ agents, matchInfoMap = {}, onClose }) {
+  const [profiles, setProfiles] = useState({})
+  const colWidth = 200
+
+  useEffect(() => {
+    if (MOCK) {
+      const map = {}
+      agents.forEach((a) => {
+        map[a.id] = {
+          description: 'Demo agent description showing capabilities and supported operations in the ACP network.',
+          symbol: 'DEMO',
+          category: 'ON_CHAIN',
+          twitterHandle: 'virtuals_io',
+          hasGraduated: true,
+          enabledChains: [{ id: 8453, name: 'BASE' }],
+          offerings: [
+            { id: 1, name: 'Token Swap', price: 0.5, priceUsd: 0.45, slaMinutes: 5 },
+            { id: 2, name: 'Market Analysis', price: 1.0, priceUsd: 0.90, slaMinutes: 15 },
+          ],
+          metrics: { isOnline: a.successRate > 90, rating: 4.5 },
+        }
+      })
+      setProfiles(map)
+      return
+    }
+    agents.forEach((agent) => {
+      fetch(`https://acpx.virtuals.io/api/agents?filters[id][$eq]=${agent.id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          const item = Array.isArray(data) ? data[0] : data?.data?.[0] ?? data
+          setProfiles((prev) => ({ ...prev, [agent.id]: item ?? {} }))
+        })
+        .catch(() => setProfiles((prev) => ({ ...prev, [agent.id]: {} })))
+    })
+  }, [])
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.88)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
+      <style>{`@keyframes slideUp { from { transform: translateY(40px); opacity:0 } to { transform: translateY(0); opacity:1 } } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          flex: 1, display: 'flex', flexDirection: 'column',
+          background: C.bg, animation: 'slideUp 0.22s ease',
+          maxHeight: '100vh',
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Compare Agents</div>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>
+              {agents.length} SELECTED · SCROLL HORIZONTALLY
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >✕</button>
+        </div>
+
+        {/* Scrollable comparison columns */}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', minWidth: agents.length * colWidth, paddingBottom: 40 }}>
+            {agents.map((agent, idx) => {
+              const rich = profiles[agent.id] ?? {}
+              const metricsData = rich.metrics ?? {}
+              const isOnline = metricsData.isOnline ?? false
+              const rating = metricsData.rating ?? null
+              const loaded = agent.id in profiles
+              const matchInfo = matchInfoMap[agent.id]
+
+              return (
+                <div
+                  key={agent.id}
+                  style={{
+                    width: colWidth, flexShrink: 0,
+                    borderRight: idx < agents.length - 1 ? `1px solid ${C.border}` : 'none',
+                    padding: '20px 14px',
+                  }}
+                >
+                  {/* Avatar + name */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 16, gap: 6 }}>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 10, border: `1px solid ${C.border2}`, background: C.surface2, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {agent.profilePic
+                          ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 22, color: C.textMuted }}>{agent.name?.[0]}</span>}
+                      </div>
+                      <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: isOnline ? C.green : C.textFaint, border: `2px solid ${C.bg}` }} />
+                    </div>
+                    <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, lineHeight: 1.3 }}>{agent.name}</div>
+                    {rich.symbol && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.lime, fontWeight: 700 }}>${rich.symbol}</div>}
+                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '55' : C.border2}`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
+                        {isOnline ? '● ONLINE' : '○ OFFLINE'}
+                      </span>
+                      {matchInfo?.category && (
+                        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
+                          {matchInfo.category}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Metrics */}
+                  <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>METRICS</div>
+                  {[
+                    { label: 'SUCCESS', value: agent.successRate != null ? `${agent.successRate.toFixed(1)}%` : '—' },
+                    { label: 'VOLUME', value: fmtMoney(agent.volume ?? agent.grossAgenticAmount) },
+                    { label: 'REVENUE', value: fmtMoney(agent.revenue) },
+                    { label: 'JOBS', value: fmtCount(agent.successfulJobCount) },
+                    { label: 'BUYERS', value: fmtCount(agent.uniqueBuyerCount) },
+                    { label: 'MEMOS', value: fmtCount(agent.memoCount) },
+                    ...(rating != null ? [{ label: 'RATING', value: `★ ${rating.toFixed(1)}`, highlight: true }] : []),
+                  ].map(({ label, value, highlight }) => (
+                    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: `1px solid ${C.border}` }}>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>{label}</span>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: highlight ? C.lime : C.textPrimary, fontWeight: 600 }}>{value}</span>
+                    </div>
+                  ))}
+
+                  {/* Description */}
+                  {!loaded ? (
+                    <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite' }} />
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>Loading...</span>
+                    </div>
+                  ) : rich.description ? (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>ABOUT</div>
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.5 }}>{rich.description}</div>
+                    </div>
+                  ) : null}
+
+                  {/* Why matched */}
+                  {matchInfo?.reason && (
+                    <div style={{ marginTop: 12, padding: '8px 10px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 7 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY MATCHED</div>
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.4 }}>{matchInfo.reason}</div>
+                    </div>
+                  )}
+
+                  {/* Offerings */}
+                  {rich.offerings?.length > 0 && (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>OFFERINGS ({rich.offerings.length})</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {rich.offerings.slice(0, 3).map((o) => (
+                          <div key={o.id} style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: '6px 8px' }}>
+                            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 11, color: C.textPrimary, fontWeight: 500, marginBottom: 2 }}>{o.name}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime }}>{o.price != null ? `${o.price} VIRTUAL` : '—'}</span>
+                              {o.slaMinutes && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>{o.slaMinutes}min SLA</span>}
+                            </div>
+                          </div>
+                        ))}
+                        {rich.offerings.length > 3 && (
+                          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, textAlign: 'center', paddingTop: 2 }}>+{rich.offerings.length - 3} more</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chains */}
+                  {rich.enabledChains?.length > 0 && (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>CHAINS</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                        {rich.enabledChains.map((c) => (
+                          <span key={c.id} style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 3, padding: '2px 5px' }}>{c.name}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Twitter */}
+                  {rich.twitterHandle && (
+                    <div style={{ marginTop: 12 }}>
+                      <a href={`https://twitter.com/${rich.twitterHandle}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, textDecoration: 'none' }}>
+                        @{rich.twitterHandle} ↗
+                      </a>
+                    </div>
+                  )}
+
+                  {/* View link */}
+                  <a
+                    href={agentUrl(agent)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'block', marginTop: 16,
+                      fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700,
+                      color: '#0A0A0A', background: C.lime,
+                      borderRadius: 6, padding: '9px 0', textDecoration: 'none',
+                      textAlign: 'center', letterSpacing: 1,
+                    }}
+                  >
+                    VIEW ON VIRTUALS →
+                  </a>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Done screen ──────────────────────────────────────────────────────────────
 function DoneScreen({ saved, query, onRestart, onHistory }) {
+  const [selected, setSelected] = useState(new Set())
+  const [comparing, setComparing] = useState(false)
+
+  function toggleSelect(id) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else if (next.size < 3) next.add(id)
+      return next
+    })
+  }
+
+  const selectedAgents = saved.filter((a) => selected.has(a.id))
+  const matchInfoMap = Object.fromEntries(saved.map((a) => [a.id, a.matchInfo]))
+  const showCompareBar = selected.size >= 2
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px', paddingBottom: showCompareBar ? 120 : 32 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
@@ -827,54 +1065,84 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
           </div>
         )}
 
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: 20 }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: saved.length > 1 ? 10 : 20 }}>
           {saved.length === 0
             ? 'No agents saved this round. Try a new search!'
             : `${saved.length} agent${saved.length > 1 ? 's' : ''} saved. Ready to hire.`}
         </p>
 
+        {saved.length > 1 && (
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
+            TAP TO SELECT · COMPARE UP TO 3
+          </div>
+        )}
+
         {/* Saved list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
-          {saved.map((agent) => (
-            <div key={agent.id} style={{
-              background: C.surface, border: `1px solid ${C.border2}`,
-              borderRadius: 8, padding: '14px 16px',
-              display: 'flex', gap: 12, alignItems: 'center',
-            }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 6,
-                border: `1px solid ${C.border2}`, background: C.surface2,
-                overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                {agent.profilePic ? (
-                  <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                ) : (
-                  <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
-                )}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 2 }}>
-                  {agent.name}
-                </div>
-                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.4 }}>
-                  {agent.matchInfo?.reason}
-                </div>
-              </div>
-              <a
-                href={agentUrl(agent)}
-                target="_blank"
-                rel="noopener noreferrer"
+          {saved.map((agent) => {
+            const isSel = selected.has(agent.id)
+            const maxed = selected.size >= 3 && !isSel
+            return (
+              <div
+                key={agent.id}
+                onClick={() => !maxed && toggleSelect(agent.id)}
                 style={{
-                  fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
-                  color: '#0A0A0A', background: C.lime,
-                  borderRadius: 6, padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
+                  background: C.surface, border: `1px solid ${isSel ? C.lime : C.border2}`,
+                  boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
+                  borderRadius: 8, padding: '14px 16px',
+                  display: 'flex', gap: 12, alignItems: 'center',
+                  cursor: maxed ? 'default' : 'pointer',
+                  opacity: maxed ? 0.45 : 1,
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
                 }}
               >
-                VIEW →
-              </a>
-            </div>
-          ))}
+                {/* Checkbox */}
+                <div style={{
+                  width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+                  border: `1.5px solid ${isSel ? C.lime : C.border2}`,
+                  background: isSel ? C.lime : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s',
+                }}>
+                  {isSel && <span style={{ fontSize: 10, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                </div>
+
+                <div style={{
+                  width: 40, height: 40, borderRadius: 6,
+                  border: `1px solid ${C.border2}`, background: C.surface2,
+                  overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  {agent.profilePic ? (
+                    <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                  ) : (
+                    <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 2 }}>
+                    {agent.name}
+                  </div>
+                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.4 }}>
+                    {agent.matchInfo?.reason}
+                  </div>
+                </div>
+                <a
+                  href={agentUrl(agent)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
+                    color: '#0A0A0A', background: C.lime,
+                    borderRadius: 6, padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
+                  }}
+                >
+                  VIEW →
+                </a>
+              </div>
+            )
+          })}
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
@@ -902,6 +1170,47 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
           </button>
         </div>
       </div>
+
+      {/* Sticky compare bar */}
+      {showCompareBar && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: C.surface, borderTop: `1px solid ${C.border2}`,
+          padding: '12px 16px 24px',
+          display: 'flex', justifyContent: 'center',
+        }}>
+          <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, flex: 1 }}>
+              {selected.size} SELECTED
+            </span>
+            <button
+              onClick={() => setComparing(true)}
+              style={{
+                background: C.lime, border: 'none', borderRadius: 8,
+                padding: '12px 24px', cursor: 'pointer',
+                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
+                color: '#0A0A0A', letterSpacing: 1,
+              }}
+            >
+              COMPARE {selected.size}
+            </button>
+            <button
+              onClick={() => setSelected(new Set())}
+              style={{
+                background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
+                padding: '12px 14px', cursor: 'pointer',
+                fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted,
+              }}
+            >
+              CLEAR
+            </button>
+          </div>
+        </div>
+      )}
+
+      {comparing && (
+        <CompareModal agents={selectedAgents} matchInfoMap={matchInfoMap} onClose={() => setComparing(false)} />
+      )}
     </div>
   )
 }
@@ -942,11 +1251,27 @@ function saveToHistory(entry) {
 function HistoryScreen({ onBack }) {
   const [history, setHistory] = useState(loadHistory)
   const [expanded, setExpanded] = useState(null)
+  const [selected, setSelected] = useState(new Map()) // id → agent object
+  const [comparing, setComparing] = useState(false)
 
   function clearAll() {
     localStorage.removeItem(HISTORY_KEY)
     setHistory([])
+    setSelected(new Map())
   }
+
+  function toggleSelect(agent) {
+    setSelected((prev) => {
+      const next = new Map(prev)
+      if (next.has(agent.id)) next.delete(agent.id)
+      else if (next.size < 3) next.set(agent.id, agent)
+      return next
+    })
+  }
+
+  const selectedAgents = Array.from(selected.values())
+  const matchInfoMap = Object.fromEntries(selectedAgents.map((a) => [a.id, a.matchInfo]))
+  const showCompareBar = selected.size >= 2
 
   if (history.length === 0) {
     return (
@@ -962,13 +1287,17 @@ function HistoryScreen({ onBack }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '28px 16px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '28px 16px', paddingBottom: showCompareBar ? 120 : 40 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
           <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Search History</span>
           <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
+        </div>
+
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
+          TAP AGENTS TO SELECT · COMPARE UP TO 3 ACROSS SESSIONS
         </div>
 
         {/* Sessions */}
@@ -1004,21 +1333,55 @@ function HistoryScreen({ onBack }) {
                     <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textFaint, textAlign: 'center', padding: '8px 0' }}>Nothing shortlisted this session</div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {session.saved.map((agent) => (
-                        <div key={agent.id} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                            {agent.profilePic
-                              ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                              : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textMuted }}>{agent.name?.[0]}</span>
-                            }
+                      {session.saved.map((agent) => {
+                        const isSel = selected.has(agent.id)
+                        const maxed = selected.size >= 3 && !isSel
+                        return (
+                          <div
+                            key={agent.id}
+                            onClick={() => !maxed && toggleSelect(agent)}
+                            style={{
+                              display: 'flex', gap: 10, alignItems: 'center',
+                              padding: '8px 10px', borderRadius: 7,
+                              border: `1px solid ${isSel ? C.lime : C.border}`,
+                              boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
+                              background: isSel ? `${C.lime}08` : 'transparent',
+                              cursor: maxed ? 'default' : 'pointer',
+                              opacity: maxed ? 0.4 : 1,
+                              transition: 'border-color 0.15s, background 0.15s',
+                            }}
+                          >
+                            {/* Checkbox */}
+                            <div style={{
+                              width: 16, height: 16, borderRadius: 3, flexShrink: 0,
+                              border: `1.5px solid ${isSel ? C.lime : C.border2}`,
+                              background: isSel ? C.lime : 'transparent',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              transition: 'all 0.15s',
+                            }}>
+                              {isSel && <span style={{ fontSize: 9, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                            </div>
+
+                            <div style={{ width: 32, height: 32, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                              {agent.profilePic
+                                ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                                : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textMuted }}>{agent.name?.[0]}</span>
+                              }
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 13, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
+                              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
+                            </div>
+                            <a
+                              href={agentUrl(agent)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}
+                            >VIEW →</a>
                           </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 13, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
-                            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
-                          </div>
-                          <a href={agentUrl(agent)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}>VIEW →</a>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -1027,6 +1390,50 @@ function HistoryScreen({ onBack }) {
           ))}
         </div>
       </div>
+
+      {/* Sticky compare bar */}
+      {showCompareBar && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: C.surface, borderTop: `1px solid ${C.border2}`,
+          padding: '12px 16px 24px',
+          display: 'flex', justifyContent: 'center',
+        }}>
+          <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted }}>{selected.size} SELECTED</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textFaint, marginTop: 1 }}>
+                {selectedAgents.map((a) => a.name).join(', ')}
+              </div>
+            </div>
+            <button
+              onClick={() => setComparing(true)}
+              style={{
+                background: C.lime, border: 'none', borderRadius: 8,
+                padding: '12px 24px', cursor: 'pointer',
+                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
+                color: '#0A0A0A', letterSpacing: 1,
+              }}
+            >
+              COMPARE {selected.size}
+            </button>
+            <button
+              onClick={() => setSelected(new Map())}
+              style={{
+                background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
+                padding: '12px 14px', cursor: 'pointer',
+                fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted,
+              }}
+            >
+              CLEAR
+            </button>
+          </div>
+        </div>
+      )}
+
+      {comparing && (
+        <CompareModal agents={selectedAgents} matchInfoMap={matchInfoMap} onClose={() => setComparing(false)} />
+      )}
     </div>
   )
 }
