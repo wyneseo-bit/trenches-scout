@@ -1799,14 +1799,7 @@ export default function App() {
       const allAgents = await fetchAgents()
       setAgents(allAgents)
 
-      const summaries = allAgents.map((a) => ({
-        id: a.id,
-        name: a.name,
-        successRate: a.successRate,
-        revenue: a.revenue,
-        jobs: a.successfulJobCount,
-        buyers: a.uniqueBuyerCount,
-      }))
+      const summaries = allAgents.map((a) => ({ id: a.id, name: a.name }))
 
       const res = await fetch('/api/match', {
         method: 'POST',

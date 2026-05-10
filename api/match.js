@@ -23,15 +23,23 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'No agents fetched from ACP API' })
   }
 
-  const prompt = `You are an AI agent matchmaker for Virtuals Protocol's ACP (Agent Commerce Protocol).
+  const prompt = `You are a strict agent matchmaker for Virtuals Protocol's ACP (Agent Commerce Protocol).
 
-User wants: "${query}"
+User's need: "${query}"
 
-Here are the available agents (infer their function from the name and metrics):
+Your ONLY job is to find agents whose name clearly suggests they can fulfil the user's specific need. Relevance is everything — do NOT pick an agent just because it sounds popular or has a cool name.
+
+Rules:
+- If the user needs content/social (posts, tweets, writing, X/Twitter growth) → look for agents with words like Content, Social, Tweet, Post, Write, Creator, Media, Marketing in their name. Skip DeFi/trading agents entirely.
+- If the user needs DeFi/trading → look for Swap, Trade, Finance, DeFi, Yield, etc. Skip content agents.
+- If an agent's name gives no clear signal of its function, skip it.
+- Return fewer than 5 if fewer genuinely match — never pad with irrelevant agents.
+
+Available agents (id + name only):
 ${JSON.stringify(agents)}
 
-Pick the 5 best matches for the user's need. Return ONLY a raw JSON array with no markdown, no code blocks:
-[{"id":84,"category":"DeFi","reason":"one sentence why this agent matches"},...]
+Return ONLY a raw JSON array, no markdown:
+[{"id":84,"category":"Content","reason":"one sentence explaining exactly why this agent fits the user's need"},...]
 
 Valid categories: DeFi, Trading, Content, Social, Analytics, Utility`
 
