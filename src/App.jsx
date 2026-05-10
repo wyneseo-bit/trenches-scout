@@ -13,26 +13,26 @@ function useIsDesktop() {
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
-  bg: '#0A0A0A',
-  surface: '#111111',
-  surface2: '#1A1A1A',
-  border: '#222222',
-  border2: '#2A2A2A',
-  lime: '#C3FF50',
+  bg: '#0D0F14',
+  surface: '#141922',
+  surface2: '#1A2130',
+  border: '#1E2535',
+  border2: '#252D3D',
+  lime: '#00E5B4',
   textPrimary: '#FFFFFF',
-  textMuted: '#888888',
-  textFaint: '#444444',
-  green: '#C3FF50',
-  red: '#FF4444',
+  textMuted: '#8899AA',
+  textFaint: '#3D4A5C',
+  green: '#00E5B4',
+  red: '#FF4466',
 }
 
 const CATEGORY_COLORS = {
-  DeFi: '#C3FF50',
-  Trading: '#C3FF50',
-  Content: '#C3FF50',
-  Social: '#C3FF50',
-  Analytics: '#C3FF50',
-  Utility: '#C3FF50',
+  DeFi: '#00E5B4',
+  Trading: '#00E5B4',
+  Content: '#00E5B4',
+  Social: '#00E5B4',
+  Analytics: '#00E5B4',
+  Utility: '#00E5B4',
 }
 
 function catColor(cat) {
