@@ -58,6 +58,48 @@ function agentUrl(agent) {
   return `https://app.virtuals.io/acp/agent/${agent.id}`
 }
 
+function virtualUrl(agent) {
+  return agent.virtualAgentId ? `https://app.virtuals.io/virtuals/${agent.virtualAgentId}` : null
+}
+
+// Two-button row: ACP page always shown, Virtuals token page shown when available
+function AgentLinks({ agent, block = false }) {
+  const acpUrl = agentUrl(agent)
+  const vUrl = virtualUrl(agent)
+  if (block) {
+    // Full-width stacked layout for swipe card CTA
+    return (
+      <div style={{ display: 'flex', gap: 8 }}>
+        <a href={acpUrl} target="_blank" rel="noopener noreferrer"
+          style={{ flex: 1, display: 'block', padding: '13px 8px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}>
+          ACP PAGE →
+        </a>
+        {vUrl && (
+          <a href={vUrl} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, display: 'block', padding: '13px 8px', background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.lime, letterSpacing: 1 }}>
+            VIRTUAL →
+          </a>
+        )}
+      </div>
+    )
+  }
+  // Compact inline layout for list rows / shortlist
+  return (
+    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+      <a href={acpUrl} target="_blank" rel="noopener noreferrer"
+        style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '5px 9px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        ACP →
+      </a>
+      {vUrl && (
+        <a href={vUrl} target="_blank" rel="noopener noreferrer"
+          style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: C.lime, background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 5, padding: '5px 9px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          V →
+        </a>
+      )}
+    </div>
+  )
+}
+
 // ─── Sparkline ───────────────────────────────────────────────────────────────
 function Sparkline({ data, width = 80, height = 28 }) {
   if (!data || data.length < 2) return null
@@ -335,14 +377,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
           )}
 
           {/* CTA */}
-          <a
-            href={agentUrl(agent)}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'block', width: '100%', padding: '14px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: '#0A0A0A', letterSpacing: 2 }}
-          >
-            VIEW ON VIRTUALS →
-          </a>
+          <AgentLinks agent={agent} block />
         </div>
       </div>
     </div>
@@ -1065,20 +1100,9 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                   )}
 
                   {/* View link */}
-                  <a
-                    href={agentUrl(agent)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'block', marginTop: 16,
-                      fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700,
-                      color: '#0A0A0A', background: C.lime,
-                      borderRadius: 6, padding: '9px 0', textDecoration: 'none',
-                      textAlign: 'center', letterSpacing: 1,
-                    }}
-                  >
-                    VIEW ON VIRTUALS →
-                  </a>
+                  <div style={{ marginTop: 16 }}>
+                    <AgentLinks agent={agent} block />
+                  </div>
                 </div>
               )
             })}
@@ -1201,19 +1225,9 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
                     {agent.matchInfo?.reason}
                   </div>
                 </div>
-                <a
-                  href={agentUrl(agent)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    fontFamily: 'JetBrains Mono,monospace', fontSize: 12, fontWeight: 700,
-                    color: '#0A0A0A', background: C.lime,
-                    borderRadius: 6, padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
-                  }}
-                >
-                  VIEW →
-                </a>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <AgentLinks agent={agent} />
+                </div>
               </div>
             )
           })}
@@ -1356,13 +1370,9 @@ function AgentRow({ agent, isSel, maxed, onToggle }) {
         <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
         <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.35, marginTop: 2 }}>{agent.matchInfo?.reason}</div>
       </div>
-      <a
-        href={agentUrl(agent)}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '5px 10px', textDecoration: 'none', flexShrink: 0 }}
-      >VIEW →</a>
+      <div onClick={(e) => e.stopPropagation()}>
+        <AgentLinks agent={agent} />
+      </div>
     </div>
   )
 }
@@ -1788,23 +1798,15 @@ function MiniAgentCard({ agent, onExpand }) {
       )}
 
       {/* Footer: success rate + view */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
-          {agent.successRate != null ? `${agent.successRate.toFixed(1)}% success` : ''}
-        </span>
-        <a
-          href={agentUrl(agent)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            padding: '4px 10px', background: C.lime, borderRadius: 5, textDecoration: 'none',
-            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
-            color: '#0A0A0A', letterSpacing: 1,
-          }}
-        >
-          VIEW →
-        </a>
+      <div style={{ marginTop: 'auto' }}>
+        {agent.successRate != null && (
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: agent.successRate > 90 ? C.lime : C.textMuted, marginBottom: 8 }}>
+            {agent.successRate.toFixed(1)}% success
+          </div>
+        )}
+        <div onClick={(e) => e.stopPropagation()}>
+          <AgentLinks agent={agent} block />
+        </div>
       </div>
     </div>
   )
