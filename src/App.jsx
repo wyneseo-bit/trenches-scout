@@ -1750,14 +1750,17 @@ export default function App() {
 
   async function fetchAgents() {
     const sortKeys = ['volume', 'revenue', 'successRate']
+    const pages = Array.from({ length: 20 }, (_, i) => i + 1)
     const results = await Promise.allSettled(
-      sortKeys.map((sortBy) =>
-        fetch(
-          `https://acpx.virtuals.io/api/metrics/agents?page=1&pageSize=30&sortBy=${sortBy}&sortOrder=desc`
-        ).then((r) => {
-          if (!r.ok) throw new Error(`ACP API error: ${r.status}`)
-          return r.json()
-        })
+      sortKeys.flatMap((sortBy) =>
+        pages.map((page) =>
+          fetch(
+            `https://acpx.virtuals.io/api/metrics/agents?page=${page}&pageSize=30&sortBy=${sortBy}&sortOrder=desc`
+          ).then((r) => {
+            if (!r.ok) throw new Error(`ACP API error: ${r.status}`)
+            return r.json()
+          })
+        )
       )
     )
     const seen = new Set()
