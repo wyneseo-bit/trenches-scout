@@ -1608,65 +1608,128 @@ function BottomNav({ active, onChange, onHistory }) {
   )
 }
 
-// ─── Discovery mini agent card (horizontal scroll) ────────────────────────────
+// ─── Discovery mini agent card ────────────────────────────────────────────────
 function MiniAgentCard({ agent, onExpand }) {
   const [imgError, setImgError] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(true)
+
+  useEffect(() => {
+    if (MOCK) {
+      setTimeout(() => {
+        setProfile({
+          description: 'Autonomous AI agent specialising in on-chain operations and market intelligence across the ACP network.',
+          offerings: [
+            { id: 1, name: 'Token Swap' },
+            { id: 2, name: 'Market Analysis' },
+            { id: 3, name: 'Portfolio Tracking' },
+          ],
+        })
+        setProfileLoading(false)
+      }, 300 + Math.random() * 400)
+      return
+    }
+    fetch(`https://acpx.virtuals.io/api/agents?filters[id][$eq]=${agent.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const item = Array.isArray(data) ? data[0] : data?.data?.[0] ?? data
+        setProfile(item ?? null)
+      })
+      .catch(() => setProfile(null))
+      .finally(() => setProfileLoading(false))
+  }, [agent.id])
+
   const trend = agent.past7dVolume?.length >= 2
     ? (agent.past7dVolume[agent.past7dVolume.length - 1].value >= agent.past7dVolume[0].value ? 'up' : 'down')
     : null
+  const offerings = profile?.offerings?.slice(0, 3) ?? []
+  const description = profile?.description ?? null
 
   return (
     <div
       onClick={() => onExpand(agent)}
       style={{
-        flexShrink: 0, width: 150,
+        flexShrink: 0, width: 220,
         background: C.surface, border: `1px solid ${C.border2}`,
-        borderRadius: 10, padding: '14px 12px',
-        cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 8,
+        borderRadius: 12, padding: '16px 14px',
+        cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 10,
+        transition: 'border-color 0.15s',
       }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.border2.replace('2A', '44') }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2 }}
     >
-      {/* Avatar */}
-      <div style={{ width: 44, height: 44, borderRadius: 8, background: C.surface2, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {agent.profilePic && !imgError
-          ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textMuted }}>{agent.name?.[0]}</span>
-        }
-      </div>
-
-      {/* Name */}
-      <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 13, color: C.textPrimary, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-        {agent.name}
-      </div>
-
-      {/* Key metric */}
-      <div>
-        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 2 }}>VOLUME</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textPrimary, fontWeight: 700 }}>{fmtMoney(agent.volume ?? agent.grossAgenticAmount)}</span>
-          {trend && <span style={{ fontSize: 10, color: trend === 'up' ? C.green : C.red }}>{trend === 'up' ? '↑' : '↓'}</span>}
+      {/* Header row: avatar + name + online dot */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 8, background: C.surface2, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {agent.profilePic && !imgError
+              ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
+            }
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+            {agent.name}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700, color: C.textPrimary }}>{fmtMoney(agent.volume ?? agent.grossAgenticAmount)}</span>
+            {trend && <span style={{ fontSize: 10, color: trend === 'up' ? C.green : C.red }}>{trend === 'up' ? '↑' : '↓'}</span>}
+          </div>
         </div>
       </div>
 
-      {/* Success rate */}
-      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
-        {agent.successRate != null ? `${agent.successRate.toFixed(1)}% success` : ''}
-      </div>
+      {/* Description */}
+      {profileLoading ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${C.border2}`, borderTop: `1.5px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>Loading...</span>
+        </div>
+      ) : description ? (
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+          {description}
+        </div>
+      ) : null}
 
-      {/* View link */}
-      <a
-        href={agentUrl(agent)}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          display: 'block', textAlign: 'center', padding: '6px',
-          background: C.lime, borderRadius: 6, textDecoration: 'none',
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700,
-          color: '#0A0A0A', letterSpacing: 1, marginTop: 'auto',
-        }}
-      >
-        VIEW →
-      </a>
+      {/* Offerings pills */}
+      {offerings.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {offerings.map((o) => (
+            <span key={o.id} style={{
+              fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime,
+              border: `1px solid ${C.lime}33`, borderRadius: 4, padding: '2px 6px',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140,
+            }}>
+              {o.name}
+            </span>
+          ))}
+          {(profile?.offerings?.length ?? 0) > 3 && (
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, padding: '2px 4px' }}>
+              +{profile.offerings.length - 3} more
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer: success rate + view */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
+          {agent.successRate != null ? `${agent.successRate.toFixed(1)}% success` : ''}
+        </span>
+        <a
+          href={agentUrl(agent)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '4px 10px', background: C.lime, borderRadius: 5, textDecoration: 'none',
+            fontFamily: 'JetBrains Mono,monospace', fontSize: 8, fontWeight: 700,
+            color: '#0A0A0A', letterSpacing: 1,
+          }}
+        >
+          VIEW →
+        </a>
+      </div>
     </div>
   )
 }
