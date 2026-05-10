@@ -582,7 +582,7 @@ function SearchScreen({ onSearch, onHistory }) {
   const submit = () => { if (query.trim()) onSearch(query.trim()) }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', paddingBottom: 100 }}>
       <div style={{ width: '100%', maxWidth: 460 }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
@@ -1031,9 +1031,310 @@ function HistoryScreen({ onBack }) {
   )
 }
 
+// ─── Bottom tab nav ───────────────────────────────────────────────────────────
+function BottomNav({ active, onChange }) {
+  const tabs = [
+    { id: 'search',   label: 'SCOUT',    icon: '⌕' },
+    { id: 'discover', label: 'DISCOVER', icon: '✦' },
+  ]
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+      background: C.surface, borderTop: `1px solid ${C.border2}`,
+      display: 'flex', justifyContent: 'center',
+    }}>
+      <div style={{ display: 'flex', width: '100%', maxWidth: 480 }}>
+        {tabs.map((tab) => {
+          const isActive = active === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              style={{
+                flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+                padding: '12px 0 16px', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: 3,
+              }}
+            >
+              <span style={{ fontSize: 18, color: isActive ? C.lime : C.textFaint, lineHeight: 1 }}>{tab.icon}</span>
+              <span style={{
+                fontFamily: 'JetBrains Mono,monospace', fontSize: 9, letterSpacing: 1,
+                color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400,
+              }}>{tab.label}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Discovery mini agent card (horizontal scroll) ────────────────────────────
+function MiniAgentCard({ agent, onExpand }) {
+  const [imgError, setImgError] = useState(false)
+  const trend = agent.past7dVolume?.length >= 2
+    ? (agent.past7dVolume[agent.past7dVolume.length - 1].value >= agent.past7dVolume[0].value ? 'up' : 'down')
+    : null
+
+  return (
+    <div
+      onClick={() => onExpand(agent)}
+      style={{
+        flexShrink: 0, width: 150,
+        background: C.surface, border: `1px solid ${C.border2}`,
+        borderRadius: 10, padding: '14px 12px',
+        cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 8,
+      }}
+    >
+      {/* Avatar */}
+      <div style={{ width: 44, height: 44, borderRadius: 8, background: C.surface2, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {agent.profilePic && !imgError
+          ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textMuted }}>{agent.name?.[0]}</span>
+        }
+      </div>
+
+      {/* Name */}
+      <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 13, color: C.textPrimary, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+        {agent.name}
+      </div>
+
+      {/* Key metric */}
+      <div>
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 2 }}>VOLUME</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textPrimary, fontWeight: 700 }}>{fmtMoney(agent.volume ?? agent.grossAgenticAmount)}</span>
+          {trend && <span style={{ fontSize: 10, color: trend === 'up' ? C.green : C.red }}>{trend === 'up' ? '↑' : '↓'}</span>}
+        </div>
+      </div>
+
+      {/* Success rate */}
+      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
+        {agent.successRate != null ? `${agent.successRate.toFixed(1)}% success` : ''}
+      </div>
+
+      {/* View link */}
+      <a
+        href={agentUrl(agent)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          display: 'block', textAlign: 'center', padding: '6px',
+          background: C.lime, borderRadius: 6, textDecoration: 'none',
+          fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700,
+          color: '#0A0A0A', letterSpacing: 1, marginTop: 'auto',
+        }}
+      >
+        VIEW →
+      </a>
+    </div>
+  )
+}
+
+// ─── Discovery section row ────────────────────────────────────────────────────
+function DiscoverSection({ title, subtitle, agents, loading, emptyMsg, onExpand }) {
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ padding: '0 16px', marginBottom: 12 }}>
+        <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary, marginBottom: 3 }}>{title}</div>
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted }}>{subtitle}</div>
+      </div>
+      {loading ? (
+        <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading...</span>
+        </div>
+      ) : agents.length === 0 ? (
+        <div style={{ padding: '16px', fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>{emptyMsg}</div>
+      ) : (
+        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 16px 8px', scrollbarWidth: 'none' }}>
+          {agents.map((agent) => (
+            <MiniAgentCard key={agent.id} agent={agent} onExpand={onExpand} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Discover screen ──────────────────────────────────────────────────────────
+function DiscoverScreen() {
+  const [recommended, setRecommended] = useState([])
+  const [recQuery, setRecQuery]       = useState('')
+  const [trending,    setTrending]    = useState([])
+  const [newRising,   setNewRising]   = useState([])
+  const [loadingRec,  setLoadingRec]  = useState(true)
+  const [loadingTrend,setLoadingTrend]= useState(true)
+  const [loadingNew,  setLoadingNew]  = useState(true)
+  const [expandedAgent, setExpandedAgent] = useState(null)
+
+  // ── helpers ──
+  function parseItems(res) {
+    return Array.isArray(res) ? res : res.data ?? res.agents ?? res.results ?? res.items ?? []
+  }
+  function isTrendingUp(agent) {
+    const v = agent.past7dVolume
+    if (!v || v.length < 2) return true
+    return v[v.length - 1].value >= v[0].value
+  }
+
+  // ── Recommended: pull from last history session's matched agents ──
+  useEffect(() => {
+    if (MOCK) {
+      setTimeout(() => {
+        setRecQuery('Automate my DeFi trades')
+        setRecommended(MOCK_AGENTS.slice(0, 5))
+        setLoadingRec(false)
+      }, 500)
+      return
+    }
+    const history = loadHistory()
+    const last = history.find((h) => h.saved?.length > 0) ?? history[0]
+    if (!last) { setLoadingRec(false); return }
+    setRecQuery(last.query)
+    // use saved agents from that session; supplement with all history matches up to 5
+    const seen = new Set()
+    const agents = []
+    for (const session of history) {
+      for (const a of session.saved ?? []) {
+        if (!seen.has(a.id)) { seen.add(a.id); agents.push(a) }
+        if (agents.length >= 5) break
+      }
+      if (agents.length >= 5) break
+    }
+    setRecommended(agents)
+    setLoadingRec(false)
+  }, [])
+
+  // ── Trending: top by memoCount with positive 7d trend ──
+  useEffect(() => {
+    if (MOCK) {
+      setTimeout(() => {
+        setTrending([...MOCK_AGENTS].sort((a, b) => (b.memoCount ?? 0) - (a.memoCount ?? 0)))
+        setLoadingTrend(false)
+      }, 800)
+      return
+    }
+    fetch('https://acpx.virtuals.io/api/metrics/agents?page=1&pageSize=20&sortBy=memoCount&sortOrder=desc')
+      .then((r) => r.json())
+      .then((data) => {
+        const items = parseItems(data)
+        setTrending(items.filter(isTrendingUp).slice(0, 8))
+      })
+      .catch(() => setTrending([]))
+      .finally(() => setLoadingTrend(false))
+  }, [])
+
+  // ── New & Rising: recently created with increasing volume ──
+  useEffect(() => {
+    if (MOCK) {
+      setTimeout(() => {
+        // simulate "new" agents as the bottom of the mock list
+        setNewRising([...MOCK_AGENTS].reverse())
+        setLoadingNew(false)
+      }, 1100)
+      return
+    }
+    fetch('https://acpx.virtuals.io/api/agents?sort[0]=createdAt:desc&pagination[pageSize]=50')
+      .then((r) => r.json())
+      .then((data) => {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        const items = parseItems(data)
+        const recent = items
+          .filter((a) => a.createdAt && new Date(a.createdAt) >= thirtyDaysAgo)
+          .filter((a) => (a.metrics?.successfulJobCount ?? 0) > 0)
+          .map((a) => ({
+            // normalise fields from /api/agents to match metrics API shape
+            id: a.id,
+            name: a.name,
+            profilePic: a.profilePic,
+            isVirtualAgent: a.isVirtualAgent,
+            virtualAgentId: a.virtualAgentId,
+            successRate: a.metrics?.successRate ?? a.successRate,
+            volume: a.metrics?.grossAgenticAmount ?? 0,
+            grossAgenticAmount: a.metrics?.grossAgenticAmount ?? 0,
+            revenue: a.metrics?.revenue,
+            successfulJobCount: a.metrics?.successfulJobCount,
+            uniqueBuyerCount: a.metrics?.uniqueBuyerCount,
+            memoCount: null,
+            lastActiveAt: a.metrics?.lastActiveAt ?? a.lastActiveAt,
+            past7dVolume: null,
+            tag: a.tag,
+          }))
+          .slice(0, 8)
+        setNewRising(recent)
+      })
+      .catch(() => setNewRising([]))
+      .finally(() => setLoadingNew(false))
+  }, [])
+
+  return (
+    <div style={{ minHeight: '100vh', background: C.bg, paddingBottom: 80 }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } } ::-webkit-scrollbar { display: none; }`}</style>
+
+      {/* Header */}
+      <div style={{ padding: '24px 16px 16px', maxWidth: 480, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#0A0A0A' }}>⬡</div>
+          <div>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
+          </div>
+        </div>
+        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 24, color: C.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>
+          Discover Agents
+        </h2>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted }}>
+          Trending, new, and personalised picks from the ACP network.
+        </p>
+      </div>
+
+      {/* Recommended */}
+      <DiscoverSection
+        title="Recommended for You"
+        subtitle={recQuery ? `Based on: "${recQuery}"` : 'Search for something to get personalised picks'}
+        agents={recommended}
+        loading={loadingRec}
+        emptyMsg="No history yet — run a search to get recommendations."
+        onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+      />
+
+      {/* Trending */}
+      <DiscoverSection
+        title="Top & Trending"
+        subtitle="Highest interactions in the last 7 days with rising volume"
+        agents={trending}
+        loading={loadingTrend}
+        emptyMsg="Could not load trending agents."
+        onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+      />
+
+      {/* New & Rising */}
+      <DiscoverSection
+        title="New & Rising"
+        subtitle="Launched in the last 30 days with growing activity"
+        agents={newRising}
+        loading={loadingNew}
+        emptyMsg="No new agents found in the last 30 days."
+        onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+      />
+
+      {/* Agent detail modal */}
+      {expandedAgent && (
+        <AgentModal
+          agent={expandedAgent.agent}
+          matchInfo={expandedAgent.matchInfo}
+          onClose={() => setExpandedAgent(null)}
+        />
+      )}
+    </div>
+  )
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [screen, setScreen] = useState('search') // search | loading | results | done | history
+  const [screen, setScreen] = useState('search') // search | loading | results | done | history | discover
   const [agents, setAgents] = useState([])
   const [matches, setMatches] = useState([])
   const [savedAgents, setSavedAgents] = useState([])
@@ -1137,6 +1438,8 @@ export default function App() {
     setScreen('search')
   }
 
+  const showBottomNav = screen === 'search' || screen === 'discover'
+
   return (
     <div style={{ minHeight: '100vh', background: C.bg }}>
       {error && (
@@ -1164,6 +1467,13 @@ export default function App() {
       )}
       {screen === 'done' && <DoneScreen saved={savedAgents} query={currentQuery} onRestart={handleRestart} onHistory={() => setScreen('history')} />}
       {screen === 'history' && <HistoryScreen onBack={() => setScreen('search')} />}
+      {screen === 'discover' && <DiscoverScreen />}
+      {showBottomNav && (
+        <BottomNav
+          active={screen === 'discover' ? 'discover' : 'search'}
+          onChange={(tab) => setScreen(tab)}
+        />
+      )}
     </div>
   )
 }
