@@ -2023,7 +2023,6 @@ export default function App() {
   function qualityFilter(agents) {
     const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
     return agents.filter((a) =>
-      (a.successRate ?? 0) > 60 &&
       ((a.revenue ?? 0) > 0 || (a.successfulJobCount ?? 0) > 0) &&
       (a.lastActiveAt == null || new Date(a.lastActiveAt) >= ninetyDaysAgo)
     )
