@@ -49,21 +49,20 @@ function agentUrl(agent) {
 }
 
 // ─── Sparkline ───────────────────────────────────────────────────────────────
-function Sparkline({ data }) {
+function Sparkline({ data, width = 80, height = 28 }) {
   if (!data || data.length < 2) return null
   const vals = data.map((d) => d.value)
   const min = Math.min(...vals)
   const max = Math.max(...vals)
   const range = max - min || 1
-  const W = 80, H = 28
   const pts = vals.map((v, i) => {
-    const x = (i / (vals.length - 1)) * W
-    const y = H - ((v - min) / range) * H
+    const x = (i / (vals.length - 1)) * width
+    const y = height - ((v - min) / range) * (height - 4) - 2
     return `${x},${y}`
   })
   const trending = vals[vals.length - 1] >= vals[0]
   return (
-    <svg width={W} height={H} style={{ display: 'block' }}>
+    <svg width={width} height={height} style={{ display: 'block', width: '100%' }}>
       <polyline
         points={pts.join(' ')}
         fill="none"
@@ -77,8 +76,171 @@ function Sparkline({ data }) {
   )
 }
 
+// ─── Agent Modal ──────────────────────────────────────────────────────────────
+function AgentModal({ agent, matchInfo, onClose }) {
+  const [imgError, setImgError] = useState(false)
+  const successDot = agent.successRate > 95 ? C.green : agent.successRate > 80 ? '#FFB347' : C.red
+
+  const lastActive = agent.lastActiveAt
+    ? new Date(agent.lastActiveAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null
+
+  const metrics = [
+    { label: 'SUCCESS RATE', value: agent.successRate != null ? `${agent.successRate.toFixed(2)}%` : '—' },
+    { label: 'TOTAL VOLUME', value: fmtMoney(agent.volume ?? agent.grossAgenticAmount) },
+    { label: 'REVENUE', value: fmtMoney(agent.revenue) },
+    { label: 'JOBS DONE', value: fmtCount(agent.successfulJobCount) },
+    { label: 'UNIQUE BUYERS', value: fmtCount(agent.uniqueBuyerCount) },
+    { label: 'MEMOS', value: fmtCount(agent.memoCount) },
+    { label: 'OFFERINGS', value: agent.offeringsCount != null ? `${agent.offeringsCount}` : '—' },
+    { label: '7D VOLUME', value: agent.past7dVolume?.length ? fmtMoney(agent.past7dVolume.reduce((s, d) => s + d.value, 0)) : '—' },
+  ]
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 480,
+          background: C.surface,
+          border: `1px solid ${C.border2}`,
+          borderRadius: '16px 16px 0 0',
+          padding: '0 0 32px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          animation: 'slideUp 0.25s ease',
+        }}
+      >
+        <style>{`@keyframes slideUp { from { transform: translateY(60px); opacity:0 } to { transform: translateY(0); opacity:1 } }`}</style>
+
+        {/* Drag handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2 }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ padding: '12px 20px 20px', borderBottom: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+            {/* Avatar */}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: 12,
+                border: `1px solid ${C.border2}`, background: C.surface2,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+              }}>
+                {agent.profilePic && !imgError
+                  ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 28, color: C.textMuted }}>{agent.name?.[0] ?? '?'}</span>
+                }
+              </div>
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: successDot, border: `2px solid ${C.surface}` }} />
+            </div>
+
+            {/* Name + meta */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary, marginBottom: 6 }}>
+                {agent.name}
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {matchInfo?.category && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    {matchInfo.category}
+                  </span>
+                )}
+                {agent.isVirtualAgent && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    VIRTUAL AGENT
+                  </span>
+                )}
+                {agent.tag && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    {agent.tag.toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Close */}
+            <button onClick={onClose} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+          </div>
+
+          {/* Match reason */}
+          {matchInfo?.reason && (
+            <div style={{ marginTop: 14, padding: '10px 14px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 8 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY IT MATCHES</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{matchInfo.reason}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Metrics grid */}
+        <div style={{ padding: '16px 20px 0' }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>PERFORMANCE METRICS</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
+            {metrics.map(({ label, value }) => (
+              <div key={label} style={{ background: C.surface2, padding: '12px 14px' }}>
+                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 15, color: C.textPrimary, fontWeight: 700 }}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 7-day chart */}
+          {agent.past7dVolume?.length >= 2 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>7-DAY VOLUME TREND</div>
+              <div style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 16px' }}>
+                <Sparkline data={agent.past7dVolume} width={340} height={52} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>
+                    {new Date(agent.past7dVolume[0].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  </span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>
+                    {new Date(agent.past7dVolume[agent.past7dVolume.length - 1].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Last active */}
+          {lastActive && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, padding: '10px 14px', background: C.surface2, borderRadius: 8, border: `1px solid ${C.border}` }}>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1 }}>LAST ACTIVE</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>{lastActive}</span>
+            </div>
+          )}
+
+          {/* CTA */}
+          <a
+            href={agentUrl(agent)}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'block', width: '100%', padding: '14px',
+              background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center',
+              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+              color: '#0A0A0A', letterSpacing: 2,
+            }}
+          >
+            VIEW ON VIRTUALS →
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Agent Card ──────────────────────────────────────────────────────────────
-function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
+function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand }) {
   const dragRef = useRef({ active: false, startX: 0, deltaX: 0 })
   const cardRef = useRef(null)
   const [deltaX, setDeltaX] = useState(0)
@@ -114,8 +276,9 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
       setTimeout(() => onSwipe(dir), 300)
     } else {
       setDeltaX(0)
+      if (isTop && Math.abs(dx) < 8) onExpand()
     }
-  }, [onSwipe])
+  }, [onSwipe, onExpand, isTop])
 
   const rotation = isTop ? deltaX / 22 : 0
   const opacity = leaving ? 0 : 1
@@ -267,28 +430,19 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop }) {
         ))}
       </div>
 
-      {/* Footer: sparkline + view button */}
+      {/* Footer: sparkline + expand hint */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
+        <div style={{ flex: 1 }}>
           {agent.past7dVolume && agent.past7dVolume.length >= 2
             ? <Sparkline data={agent.past7dVolume} />
             : <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>NO CHART DATA</span>
           }
         </div>
-        <a
-          href={agentUrl(agent)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
-            color: '#0A0A0A', background: C.lime,
-            borderRadius: 6, padding: '6px 14px', textDecoration: 'none', letterSpacing: 1,
-            border: 'none',
-          }}
-        >
-          VIEW →
-        </a>
+        {isTop && (
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, flexShrink: 0, marginLeft: 12 }}>
+            TAP FOR MORE
+          </span>
+        )}
       </div>
     </div>
   )
@@ -433,6 +587,7 @@ function SearchScreen({ onSearch, onHistory }) {
 function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
   const [deck, setDeck] = useState(matches)
   const [saved, setSaved] = useState([])
+  const [expandedAgent, setExpandedAgent] = useState(null)
   const VISIBLE = 3
 
   const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]))
@@ -497,6 +652,7 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
               total={deck.length}
               isTop={i === 0}
               onSwipe={handleSwipe}
+              onExpand={() => setExpandedAgent({ agent, matchInfo: match })}
             />
           )
         })}
@@ -528,6 +684,15 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
             }}
           >✓</button>
         </div>
+      )}
+
+      {/* Expanded agent modal */}
+      {expandedAgent && (
+        <AgentModal
+          agent={expandedAgent.agent}
+          matchInfo={expandedAgent.matchInfo}
+          onClose={() => setExpandedAgent(null)}
+        />
       )}
     </div>
   )
@@ -650,11 +815,11 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
 const MOCK = true
 
 const MOCK_AGENTS = [
-  { id: 1, name: 'Ethy AI', virtualAgentId: '19520', profilePic: null, successRate: 99.2, revenue: 572787, successfulJobCount: 1139030, uniqueBuyerCount: 7496, past7dVolume: [{ time: '2026-05-03', value: 100000 }, { time: '2026-05-04', value: 130000 }, { time: '2026-05-05', value: 120000 }, { time: '2026-05-06', value: 160000 }, { time: '2026-05-07', value: 210000 }] },
-  { id: 2, name: 'Trade Executor', virtualAgentId: '20001', profilePic: null, successRate: 96.5, revenue: 320000, successfulJobCount: 450000, uniqueBuyerCount: 3200, past7dVolume: [{ time: '2026-05-03', value: 80000 }, { time: '2026-05-04', value: 75000 }, { time: '2026-05-05', value: 60000 }, { time: '2026-05-06', value: 55000 }, { time: '2026-05-07', value: 50000 }] },
-  { id: 3, name: 'Luna', virtualAgentId: '18800', profilePic: null, successRate: 88.1, revenue: 95000, successfulJobCount: 210000, uniqueBuyerCount: 1800, past7dVolume: [{ time: '2026-05-03', value: 20000 }, { time: '2026-05-04', value: 22000 }, { time: '2026-05-05', value: 25000 }, { time: '2026-05-06', value: 28000 }, { time: '2026-05-07', value: 30000 }] },
-  { id: 4, name: 'Director', virtualAgentId: '17500', profilePic: null, successRate: 91.4, revenue: 180000, successfulJobCount: 320000, uniqueBuyerCount: 2400, past7dVolume: null },
-  { id: 5, name: 'Nox Analytics', virtualAgentId: '16200', profilePic: null, successRate: 97.8, revenue: 410000, successfulJobCount: 780000, uniqueBuyerCount: 5100, past7dVolume: [{ time: '2026-05-03', value: 60000 }, { time: '2026-05-04', value: 65000 }, { time: '2026-05-05', value: 72000 }, { time: '2026-05-06', value: 80000 }, { time: '2026-05-07', value: 95000 }] },
+  { id: 1, name: 'Ethy AI', isVirtualAgent: true, virtualAgentId: '19520', profilePic: null, successRate: 99.23, volume: 218099220, revenue: 572787, successfulJobCount: 1139030, uniqueBuyerCount: 7496, memoCount: 3420469, offeringsCount: 10, grossAgenticAmount: 218099220, lastActiveAt: '2026-04-08T09:22:25.980Z', tag: null, past7dVolume: [{ time: '2026-05-03T08:00:00.000Z', value: 100000 }, { time: '2026-05-04T08:00:00.000Z', value: 130000 }, { time: '2026-05-05T08:00:00.000Z', value: 120000 }, { time: '2026-05-06T08:00:00.000Z', value: 160000 }, { time: '2026-05-07T08:00:00.000Z', value: 210000 }] },
+  { id: 2, name: 'Trade Executor', isVirtualAgent: true, virtualAgentId: '20001', profilePic: null, successRate: 96.5, volume: 88000000, revenue: 320000, successfulJobCount: 450000, uniqueBuyerCount: 3200, memoCount: 980000, offeringsCount: 6, grossAgenticAmount: 88000000, lastActiveAt: '2026-05-01T14:10:00.000Z', tag: 'defi', past7dVolume: [{ time: '2026-05-03T08:00:00.000Z', value: 80000 }, { time: '2026-05-04T08:00:00.000Z', value: 75000 }, { time: '2026-05-05T08:00:00.000Z', value: 60000 }, { time: '2026-05-06T08:00:00.000Z', value: 55000 }, { time: '2026-05-07T08:00:00.000Z', value: 50000 }] },
+  { id: 3, name: 'Luna', isVirtualAgent: false, virtualAgentId: '18800', profilePic: null, successRate: 88.1, volume: 22000000, revenue: 95000, successfulJobCount: 210000, uniqueBuyerCount: 1800, memoCount: 430000, offeringsCount: 4, grossAgenticAmount: 22000000, lastActiveAt: '2026-05-07T09:00:00.000Z', tag: 'entertainment', past7dVolume: [{ time: '2026-05-03T08:00:00.000Z', value: 20000 }, { time: '2026-05-04T08:00:00.000Z', value: 22000 }, { time: '2026-05-05T08:00:00.000Z', value: 25000 }, { time: '2026-05-06T08:00:00.000Z', value: 28000 }, { time: '2026-05-07T08:00:00.000Z', value: 30000 }] },
+  { id: 4, name: 'Director', isVirtualAgent: true, virtualAgentId: '17500', profilePic: null, successRate: 91.4, volume: 45000000, revenue: 180000, successfulJobCount: 320000, uniqueBuyerCount: 2400, memoCount: 760000, offeringsCount: 8, grossAgenticAmount: 45000000, lastActiveAt: '2026-04-28T11:30:00.000Z', tag: 'content', past7dVolume: null },
+  { id: 5, name: 'Nox Analytics', isVirtualAgent: true, virtualAgentId: '16200', profilePic: null, successRate: 97.8, volume: 134000000, revenue: 410000, successfulJobCount: 780000, uniqueBuyerCount: 5100, memoCount: 2100000, offeringsCount: 12, grossAgenticAmount: 134000000, lastActiveAt: '2026-05-09T07:45:00.000Z', tag: null, past7dVolume: [{ time: '2026-05-03T08:00:00.000Z', value: 60000 }, { time: '2026-05-04T08:00:00.000Z', value: 65000 }, { time: '2026-05-05T08:00:00.000Z', value: 72000 }, { time: '2026-05-06T08:00:00.000Z', value: 80000 }, { time: '2026-05-07T08:00:00.000Z', value: 95000 }] },
 ]
 
 const MOCK_MATCHES = [
