@@ -62,38 +62,40 @@ function virtualUrl(agent) {
   return agent.virtualAgentId ? `https://app.virtuals.io/virtuals/${agent.virtualAgentId}` : null
 }
 
-// Two-button row: ACP page always shown, Virtuals token page shown when available
-function AgentLinks({ agent, block = false }) {
+// variant='block'  — side-by-side full-width buttons (swipe card / shortlist card)
+// variant='stack'  — vertically stacked compact buttons (rows, mini cards)
+function AgentLinks({ agent, variant = 'stack' }) {
   const acpUrl = agentUrl(agent)
   const vUrl = virtualUrl(agent)
-  if (block) {
-    // Full-width stacked layout for swipe card CTA
+
+  if (variant === 'block') {
     return (
       <div style={{ display: 'flex', gap: 8 }}>
         <a href={acpUrl} target="_blank" rel="noopener noreferrer"
-          style={{ flex: 1, display: 'block', padding: '13px 8px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}>
+          style={{ flex: 1, display: 'block', padding: '12px 8px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: '#0A0A0A', letterSpacing: 1, whiteSpace: 'nowrap' }}>
           ACP PAGE →
         </a>
         {vUrl && (
           <a href={vUrl} target="_blank" rel="noopener noreferrer"
-            style={{ flex: 1, display: 'block', padding: '13px 8px', background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.lime, letterSpacing: 1 }}>
+            style={{ flex: 1, display: 'block', padding: '12px 8px', background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.lime, letterSpacing: 1, whiteSpace: 'nowrap' }}>
             VIRTUAL →
           </a>
         )}
       </div>
     )
   }
-  // Compact inline layout for list rows / shortlist
+
+  // stack: vertically stacked small links — narrow horizontal footprint for rows & mini cards
   return (
-    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flexShrink: 0 }}>
       <a href={acpUrl} target="_blank" rel="noopener noreferrer"
-        style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '5px 9px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 9px', textDecoration: 'none', whiteSpace: 'nowrap', textAlign: 'center' }}>
         ACP →
       </a>
       {vUrl && (
         <a href={vUrl} target="_blank" rel="noopener noreferrer"
-          style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: C.lime, background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 5, padding: '5px 9px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          V →
+          style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: C.lime, background: 'transparent', border: `1px solid ${C.lime}`, borderRadius: 5, padding: '4px 9px', textDecoration: 'none', whiteSpace: 'nowrap', textAlign: 'center' }}>
+          VIRTUAL →
         </a>
       )}
     </div>
@@ -377,7 +379,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
           )}
 
           {/* CTA */}
-          <AgentLinks agent={agent} block />
+          <AgentLinks agent={agent} variant="block" />
         </div>
       </div>
     </div>
@@ -1101,7 +1103,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
 
                   {/* View link */}
                   <div style={{ marginTop: 16 }}>
-                    <AgentLinks agent={agent} block />
+                    <AgentLinks agent={agent} variant="block" />
                   </div>
                 </div>
               )
@@ -1805,7 +1807,7 @@ function MiniAgentCard({ agent, onExpand }) {
           </div>
         )}
         <div onClick={(e) => e.stopPropagation()}>
-          <AgentLinks agent={agent} block />
+          <AgentLinks agent={agent} />
         </div>
       </div>
     </div>
