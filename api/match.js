@@ -35,11 +35,18 @@ Rules:
 - Never pick an agent whose offerings are clearly unrelated (e.g. DeFi swaps for a content request).
 - Return fewer than 5 if fewer genuinely match — quality over quantity.
 
+For the "reason" field you MUST:
+- Name the specific offering(s) from the "offers" field that match the user's need, using the exact offering name as it appears.
+- Explain in one sentence how that specific offering addresses the user's request.
+- Format: "Offers '[exact offering name]' which [explains how it helps with the user's specific need]."
+- If no "offers" data is available, state what the agent name suggests it can do.
+- Never write a generic reason — always tie it directly back to a named offering.
+
 Available agents:
 ${JSON.stringify(agents)}
 
 Return ONLY a raw JSON array, no markdown:
-[{"id":84,"category":"Content","reason":"one sentence referencing the specific offering that matches the user's need"},...]
+[{"id":84,"category":"Content","reason":"Offers 'Tweet Scheduling' which automates posting content to X/Twitter to grow your account presence."},...]
 
 Valid categories: DeFi, Trading, Content, Social, Analytics, Utility`
 
