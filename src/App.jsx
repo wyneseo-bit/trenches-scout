@@ -1306,7 +1306,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
 }
 
 // ─── Mock data (set MOCK = true to skip all API calls during UI dev) ──────────
-const MOCK = false
+const MOCK = true
 
 const MOCK_AGENTS = [
   { id: 84,   name: 'Ethy AI',                          isVirtualAgent: true,  virtualAgentId: '19520', profilePic: null, successRate: 99.23, volume: 218099220, revenue: 572787, successfulJobCount: 1139030, uniqueBuyerCount: 7496,  memoCount: 3420469, offeringsCount: 10, grossAgenticAmount: 218099220, lastActiveAt: '2026-04-08T09:22:25.980Z', tag: null,           past7dVolume: [{ time: '2026-05-03T08:00:00.000Z', value: 100000 }, { time: '2026-05-04T08:00:00.000Z', value: 130000 }, { time: '2026-05-05T08:00:00.000Z', value: 120000 }, { time: '2026-05-06T08:00:00.000Z', value: 160000 }, { time: '2026-05-07T08:00:00.000Z', value: 210000 }] },
