@@ -863,7 +863,9 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
 // ─── Compare Modal ─────────────────────────────────────────────────────────────
 function CompareModal({ agents, matchInfoMap = {}, onClose }) {
   const [profiles, setProfiles] = useState({})
-  const colWidth = 200
+  const isDesktop = useIsDesktop()
+  // On desktop fill the viewport width; on mobile use a fixed min per column
+  const colWidth = isDesktop ? Math.floor((Math.min(window.innerWidth, 1200) - 64) / agents.length) : 200
 
   useEffect(() => {
     if (MOCK) {
@@ -904,27 +906,32 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
         position: 'fixed', inset: 0, zIndex: 1000,
         background: 'rgba(0,0,0,0.88)',
         backdropFilter: 'blur(8px)',
-        display: 'flex', flexDirection: 'column',
+        display: 'flex', alignItems: isDesktop ? 'center' : 'stretch', justifyContent: 'center',
+        padding: isDesktop ? '24px' : 0,
       }}
     >
       <style>{`@keyframes slideUp { from { transform: translateY(40px); opacity:0 } to { transform: translateY(0); opacity:1 } } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          flex: 1, display: 'flex', flexDirection: 'column',
+          display: 'flex', flexDirection: 'column',
           background: C.bg, animation: 'slideUp 0.22s ease',
-          maxHeight: '100vh',
+          width: '100%', maxWidth: isDesktop ? 1200 : '100%',
+          maxHeight: isDesktop ? '92vh' : '100vh',
+          borderRadius: isDesktop ? 16 : 0,
+          border: isDesktop ? `1px solid ${C.border2}` : 'none',
+          overflow: 'hidden',
         }}
       >
         {/* Header */}
         <div style={{
-          padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
+          padding: '16px 24px', borderBottom: `1px solid ${C.border}`,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,
         }}>
           <div>
             <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Compare Agents</div>
             <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>
-              {agents.length} SELECTED · SCROLL HORIZONTALLY
+              {agents.length} SELECTED{!isDesktop ? ' · SCROLL HORIZONTALLY' : ''}
             </div>
           </div>
           <button
@@ -933,9 +940,9 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
           >✕</button>
         </div>
 
-        {/* Scrollable comparison columns */}
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-          <div style={{ display: 'flex', minWidth: agents.length * colWidth, paddingBottom: 40 }}>
+        {/* Comparison columns */}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: isDesktop ? 'hidden' : 'auto' }}>
+          <div style={{ display: 'flex', minWidth: isDesktop ? '100%' : agents.length * colWidth, paddingBottom: 40 }}>
             {agents.map((agent, idx) => {
               const rich = profiles[agent.id] ?? {}
               const metricsData = rich.metrics ?? {}
@@ -948,9 +955,10 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                 <div
                   key={agent.id}
                   style={{
-                    width: colWidth, flexShrink: 0,
+                    flex: isDesktop ? 1 : `0 0 ${colWidth}px`,
+                    minWidth: isDesktop ? 0 : colWidth,
                     borderRight: idx < agents.length - 1 ? `1px solid ${C.border}` : 'none',
-                    padding: '20px 14px',
+                    padding: isDesktop ? '24px 20px' : '20px 14px',
                   }}
                 >
                   {/* Avatar + name */}
@@ -1091,7 +1099,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
     setSelected((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
-      else if (next.size < 3) next.add(id)
+      else if (next.size < 4) next.add(id)
       return next
     })
   }
@@ -1140,7 +1148,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
 
         {saved.length > 1 && (
           <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
-            TAP TO SELECT · COMPARE UP TO 3
+            TAP TO SELECT · COMPARE UP TO 4
           </div>
         )}
 
@@ -1148,7 +1156,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
           {saved.map((agent) => {
             const isSel = selected.has(agent.id)
-            const maxed = selected.size >= 3 && !isSel
+            const maxed = selected.size >= 4 && !isSel
             return (
               <div
                 key={agent.id}
@@ -1331,7 +1339,7 @@ function HistoryScreen({ onBack }) {
     setSelected((prev) => {
       const next = new Map(prev)
       if (next.has(agent.id)) next.delete(agent.id)
-      else if (next.size < 3) next.set(agent.id, agent)
+      else if (next.size < 4) next.set(agent.id, agent)
       return next
     })
   }
@@ -1364,7 +1372,7 @@ function HistoryScreen({ onBack }) {
         </div>
 
         <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
-          TAP AGENTS TO SELECT · COMPARE UP TO 3 ACROSS SESSIONS
+          TAP AGENTS TO SELECT · COMPARE UP TO 4 ACROSS SESSIONS
         </div>
 
         {/* Sessions */}
@@ -1402,7 +1410,7 @@ function HistoryScreen({ onBack }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {session.saved.map((agent) => {
                         const isSel = selected.has(agent.id)
-                        const maxed = selected.size >= 3 && !isSel
+                        const maxed = selected.size >= 4 && !isSel
                         return (
                           <div
                             key={agent.id}
