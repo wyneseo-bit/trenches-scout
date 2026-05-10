@@ -321,7 +321,7 @@ function LoadingScreen() {
 }
 
 // ─── Search screen ────────────────────────────────────────────────────────────
-function SearchScreen({ onSearch }) {
+function SearchScreen({ onSearch, onHistory }) {
   const [query, setQuery] = useState('')
   const chips = [
     'Automate my DeFi trades',
@@ -336,22 +336,29 @@ function SearchScreen({ onSearch }) {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <div style={{ width: '100%', maxWidth: 460 }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: C.lime,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 800, color: '#0A0A0A',
-            fontFamily: 'Inter,system-ui,sans-serif',
-          }}>⬡</div>
-          <div>
-            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
-              TRENCHES SCOUT
-            </div>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>
-              ACP EXPLORER · LIVE DATA
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: C.lime,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, fontWeight: 800, color: '#0A0A0A',
+              fontFamily: 'Inter,system-ui,sans-serif',
+            }}>⬡</div>
+            <div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
+                TRENCHES SCOUT
+              </div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>
+                ACP EXPLORER · LIVE DATA
+              </div>
             </div>
           </div>
+          <button onClick={onHistory} style={{
+            background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6,
+            padding: '6px 12px', cursor: 'pointer',
+            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1,
+          }}>HISTORY</button>
         </div>
 
         {/* Headline */}
@@ -527,7 +534,7 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
 }
 
 // ─── Done screen ──────────────────────────────────────────────────────────────
-function DoneScreen({ saved, onRestart }) {
+function DoneScreen({ saved, query, onRestart, onHistory }) {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
@@ -544,10 +551,23 @@ function DoneScreen({ saved, onRestart }) {
           </span>
         </div>
 
-        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.textPrimary, marginBottom: 8, letterSpacing: -0.5 }}>
+        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.textPrimary, marginBottom: 10, letterSpacing: -0.5 }}>
           Your shortlist
         </h2>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: 24 }}>
+
+        {/* Query pill */}
+        {query && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: C.surface2, border: `1px solid ${C.border2}`,
+            borderRadius: 8, padding: '8px 12px', marginBottom: 16,
+          }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>QUERY</span>
+            <span style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, fontStyle: 'italic' }}>"{query}"</span>
+          </div>
+        )}
+
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: 20 }}>
           {saved.length === 0
             ? 'No agents saved this round. Try a new search!'
             : `${saved.length} agent${saved.length > 1 ? 's' : ''} saved. Ready to hire.`}
@@ -597,18 +617,30 @@ function DoneScreen({ saved, onRestart }) {
           ))}
         </div>
 
-        <button
-          onClick={onRestart}
-          style={{
-            width: '100%', padding: '14px',
-            background: C.lime,
-            border: 'none', borderRadius: 8, cursor: 'pointer',
-            fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
-            color: '#0A0A0A', letterSpacing: 2,
-          }}
-        >
-          SCOUT AGAIN
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={onRestart}
+            style={{
+              flex: 1, padding: '14px',
+              background: C.lime,
+              border: 'none', borderRadius: 8, cursor: 'pointer',
+              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+              color: '#0A0A0A', letterSpacing: 2,
+            }}
+          >
+            SCOUT AGAIN
+          </button>
+          <button
+            onClick={onHistory}
+            style={{
+              padding: '14px 18px',
+              background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, cursor: 'pointer',
+              fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, letterSpacing: 1,
+            }}
+          >
+            HISTORY
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -633,12 +665,119 @@ const MOCK_MATCHES = [
   { id: 5, category: 'Analytics', reason: 'Provides real-time on-chain analytics and market signal alerts.' },
 ]
 
+// ─── History helpers ──────────────────────────────────────────────────────────
+const HISTORY_KEY = 'trenches_scout_history'
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? [] } catch { return [] }
+}
+
+function saveToHistory(entry) {
+  const history = loadHistory()
+  history.unshift(entry)
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 20)))
+}
+
+// ─── History screen ───────────────────────────────────────────────────────────
+function HistoryScreen({ onBack }) {
+  const [history, setHistory] = useState(loadHistory)
+  const [expanded, setExpanded] = useState(null)
+
+  function clearAll() {
+    localStorage.removeItem(HISTORY_KEY)
+    setHistory([])
+  }
+
+  if (history.length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 16px' }}>
+        <div style={{ width: '100%', maxWidth: 420, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 32, color: C.textFaint, marginBottom: 16 }}>◌</div>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 16, color: C.textMuted, marginBottom: 8 }}>No history yet</div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginBottom: 28 }}>Your shortlists will appear here after each scout session.</div>
+          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, padding: '10px 20px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, letterSpacing: 1 }}>← BACK</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '28px 16px' }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
+          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Search History</span>
+          <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
+        </div>
+
+        {/* Sessions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {history.map((session) => (
+            <div key={session.id} style={{ background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 10, overflow: 'hidden' }}>
+              {/* Session header */}
+              <button
+                onClick={() => setExpanded(expanded === session.id ? null : session.id)}
+                style={{
+                  width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                  padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, textAlign: 'left',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 5 }}>
+                    "{session.query}"
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>{session.date}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: session.saved.length > 0 ? C.lime : C.textFaint }}>
+                      {session.saved.length} SAVED
+                    </span>
+                  </div>
+                </div>
+                <span style={{ color: C.textFaint, fontSize: 12, flexShrink: 0, marginTop: 2 }}>{expanded === session.id ? '▲' : '▼'}</span>
+              </button>
+
+              {/* Expanded agent list */}
+              {expanded === session.id && (
+                <div style={{ borderTop: `1px solid ${C.border}`, padding: '10px 16px 14px' }}>
+                  {session.saved.length === 0 ? (
+                    <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textFaint, textAlign: 'center', padding: '8px 0' }}>Nothing shortlisted this session</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {session.saved.map((agent) => (
+                        <div key={agent.id} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                            {agent.profilePic
+                              ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                              : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textMuted }}>{agent.name?.[0]}</span>
+                            }
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 13, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
+                            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
+                          </div>
+                          <a href={agentUrl(agent)} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}>VIEW →</a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [screen, setScreen] = useState('search') // search | loading | results | done
+  const [screen, setScreen] = useState('search') // search | loading | results | done | history
   const [agents, setAgents] = useState([])
   const [matches, setMatches] = useState([])
   const [savedAgents, setSavedAgents] = useState([])
+  const [currentQuery, setCurrentQuery] = useState('')
   const [error, setError] = useState(null)
 
   async function fetchAgents() {
@@ -675,6 +814,7 @@ export default function App() {
 
   async function handleSearch(query) {
     setError(null)
+    setCurrentQuery(query)
     setScreen('loading')
     try {
       if (MOCK) {
@@ -719,6 +859,12 @@ export default function App() {
 
   function handleDone(saved) {
     setSavedAgents(saved)
+    saveToHistory({
+      id: Date.now(),
+      query: currentQuery,
+      date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      saved,
+    })
     setScreen('done')
   }
 
@@ -726,6 +872,7 @@ export default function App() {
     setAgents([])
     setMatches([])
     setSavedAgents([])
+    setCurrentQuery('')
     setError(null)
     setScreen('search')
   }
@@ -745,7 +892,7 @@ export default function App() {
             : error}
         </div>
       )}
-      {screen === 'search' && <SearchScreen onSearch={handleSearch} />}
+      {screen === 'search' && <SearchScreen onSearch={handleSearch} onHistory={() => setScreen('history')} />}
       {screen === 'loading' && <LoadingScreen />}
       {screen === 'results' && (
         <ResultsScreen
@@ -755,7 +902,8 @@ export default function App() {
           onDone={handleDone}
         />
       )}
-      {screen === 'done' && <DoneScreen saved={savedAgents} onRestart={handleRestart} />}
+      {screen === 'done' && <DoneScreen saved={savedAgents} query={currentQuery} onRestart={handleRestart} onHistory={() => setScreen('history')} />}
+      {screen === 'history' && <HistoryScreen onBack={() => setScreen('search')} />}
     </div>
   )
 }
