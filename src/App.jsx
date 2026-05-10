@@ -2063,14 +2063,21 @@ export default function App() {
     ])
 
     // Build offerings map: id → "Offering A, Offering B, ..."
+    // Falls back to jobs list if offerings array is empty, then description as last resort
     const offeringsMap = new Map()
+    function extractOfferings(agent) {
+      if (agent.offerings?.length) return agent.offerings.map((o) => o.name).filter(Boolean).join(', ')
+      if (agent.jobs?.length) return agent.jobs.map((j) => j.name).filter(Boolean).join(', ')
+      if (agent.description) return agent.description.slice(0, 200)
+      return null
+    }
     for (const result of profileResults) {
       if (result.status !== 'fulfilled') continue
       const items = result.value?.data ?? []
       for (const agent of items) {
-        if (agent?.id && agent.offerings?.length) {
-          offeringsMap.set(agent.id, agent.offerings.map((o) => o.name).filter(Boolean).join(', '))
-        }
+        if (!agent?.id) continue
+        const val = extractOfferings(agent)
+        if (val) offeringsMap.set(agent.id, val)
       }
     }
 
@@ -2093,6 +2100,36 @@ export default function App() {
     }
 
     if (all.length === 0) throw new Error('No agents returned from ACP API. The API may be down or blocking requests.')
+
+    // Targeted fetch for any agent still missing offerings — look them up by ID
+    const missingIds = all.filter((a) => !a._offerings).map((a) => a.id)
+    if (missingIds.length > 0) {
+      const chunks = []
+      for (let i = 0; i < missingIds.length; i += 25) chunks.push(missingIds.slice(i, i + 25))
+      const targeted = await Promise.allSettled(
+        chunks.map((ids) =>
+          fetch(
+            `https://acpx.virtuals.io/api/agents?${ids.map((id) => `filters[id][$in][]=${id}`).join('&')}&pagination[pageSize]=100`
+          ).then((r) => r.json())
+        )
+      )
+      for (const result of targeted) {
+        if (result.status !== 'fulfilled') continue
+        const items = result.value?.data ?? []
+        for (const agent of items) {
+          if (!agent?.id) continue
+          const val = extractOfferings(agent)
+          if (val) offeringsMap.set(agent.id, val)
+        }
+      }
+      // Attach newly fetched offerings
+      for (const agent of all) {
+        if (!agent._offerings && offeringsMap.has(agent.id)) {
+          agent._offerings = offeringsMap.get(agent.id)
+        }
+      }
+    }
+
     return all
   }
 
