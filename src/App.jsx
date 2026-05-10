@@ -2066,9 +2066,13 @@ export default function App() {
     // Falls back to jobs list if offerings array is empty, then description as last resort
     const offeringsMap = new Map()
     function extractOfferings(agent) {
-      if (agent.offerings?.length) return agent.offerings.map((o) => o.name).filter(Boolean).join(', ')
-      if (agent.jobs?.length) return agent.jobs.map((j) => j.name).filter(Boolean).join(', ')
+      const parts = [
+        ...(agent.offerings ?? []).map((o) => o.name).filter(Boolean),
+        ...(agent.jobs ?? []).map((j) => j.name).filter(Boolean),
+      ]
+      if (parts.length) return [...new Set(parts)].join(', ')
       if (agent.description) return agent.description.slice(0, 200)
+      if (agent.name) return agent.name
       return null
     }
     for (const result of profileResults) {
