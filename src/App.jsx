@@ -43,9 +43,14 @@ function fmtCount(n) {
   return `${n}`
 }
 
-function agentUrl(agent) {
-  if (agent.virtualAgentId) return `https://app.virtuals.io/virtuals/${agent.virtualAgentId}`
-  return 'https://app.virtuals.io/acp/scan/agents'
+// isMigrated = profile.isHidden — agent has moved to ACP v2, legacy page shows migration notice
+function agentUrl(agent, isMigrated = false) {
+  if (isMigrated) {
+    // fall back to the virtual token page (less info but still accessible)
+    if (agent.virtualAgentId) return `https://app.virtuals.io/virtuals/${agent.virtualAgentId}`
+    return 'https://app.virtuals.io/acp/scan/agents'
+  }
+  return `https://app.virtuals.io/acp/agent/${agent.id}`
 }
 
 // ─── Sparkline ───────────────────────────────────────────────────────────────
@@ -93,6 +98,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
           role: 'HYBRID',
           twitterHandle: 'virtuals_io',
           hasGraduated: true,
+          isHidden: false,
           enabledChains: [{ id: 8453, name: 'BASE' }],
           offerings: [
             { id: 1, name: 'Token Swap', price: 0.5, priceUsd: 0.45, slaMinutes: 5 },
@@ -117,6 +123,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
   const rich = profile ?? {}
   const metricsData = rich.metrics ?? {}
   const isOnline = metricsData.isOnline ?? false
+  const isMigrated = rich.isHidden === true
   const rating = metricsData.rating ?? rich.rating ?? null
   const successDot = isOnline ? C.green : (agent.successRate > 95 ? C.green : agent.successRate > 80 ? '#FFB347' : C.red)
 
@@ -320,14 +327,27 @@ function AgentModal({ agent, matchInfo, onClose }) {
             </div>
           )}
 
+          {/* Migration notice */}
+          {!profileLoading && isMigrated && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 10, padding: '10px 14px', background: `${C.red}0D`, border: `1px solid ${C.red}33`, borderRadius: 8 }}>
+              <span style={{ fontSize: 14, flexShrink: 0 }}>⚠️</span>
+              <div>
+                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.red, letterSpacing: 1, marginBottom: 3 }}>AGENT MIGRATED</div>
+                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.5 }}>
+                  This agent has been upgraded to ACP v2 and is no longer active on the legacy SDK. Linking to its token page instead.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* CTA */}
           <a
-            href={agentUrl(agent)}
+            href={agentUrl(agent, isMigrated)}
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: 'block', width: '100%', padding: '14px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 2 }}
           >
-            VIEW ON VIRTUALS →
+            {isMigrated ? 'VIEW TOKEN PAGE →' : 'VIEW ON VIRTUALS →'}
           </a>
         </div>
       </div>
@@ -535,7 +555,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
           }
         </div>
         {isTop && (
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, flexShrink: 0, marginLeft: 12 }}>
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, flexShrink: 0, marginLeft: 12, cursor: 'default' }}>
             TAP FOR MORE
           </span>
         )}
