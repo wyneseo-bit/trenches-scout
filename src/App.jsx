@@ -1115,8 +1115,168 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
   )
 }
 
+// ─── Shortlist expandable card ────────────────────────────────────────────────
+function ShortlistCard({ agent, isSel, maxed, onToggle }) {
+  const [expanded, setExpanded] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  const cat = agent.matchInfo?.category
+  const color = catColor(cat)
+
+  function handleExpand(e) {
+    e.stopPropagation()
+    if (!expanded && !profile && !profileLoading) {
+      setProfileLoading(true)
+      if (MOCK) {
+        setTimeout(() => {
+          setProfile({
+            description: 'Demo agent. In live mode this fetches real data from the Virtuals ACP API.',
+            offerings: [{ id: 1, name: 'Demo Offering', price: 1 }],
+            metrics: { isOnline: true },
+          })
+          setProfileLoading(false)
+        }, 300)
+      } else {
+        fetch(`https://acpx.virtuals.io/api/agents?filters[id][$eq]=${agent.id}`)
+          .then((r) => r.json())
+          .then((data) => {
+            const item = Array.isArray(data) ? data[0] : data?.data?.[0] ?? data
+            setProfile(item ?? {})
+          })
+          .catch(() => setProfile({}))
+          .finally(() => setProfileLoading(false))
+      }
+    }
+    setExpanded((v) => !v)
+  }
+
+  const rich = profile ?? {}
+  const offerings = rich.offerings?.length ? rich.offerings : (rich.jobs ?? [])
+  const metrics = [
+    { label: 'SUCCESS', value: agent.successRate != null ? `${agent.successRate.toFixed(1)}%` : '—', highlight: (agent.successRate ?? 0) > 90 },
+    { label: 'REVENUE', value: fmtMoney(agent.revenue) },
+    { label: 'JOBS', value: fmtCount(agent.successfulJobCount) },
+    { label: 'BUYERS', value: fmtCount(agent.uniqueBuyerCount) },
+  ]
+
+  return (
+    <div
+      style={{
+        background: C.surface,
+        border: `1px solid ${isSel ? C.lime : expanded ? C.border2 : C.border}`,
+        boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
+        borderRadius: 10, overflow: 'hidden',
+        opacity: maxed ? 0.45 : 1,
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+      }}
+    >
+      {/* Collapsed row */}
+      <div
+        onClick={() => !maxed && onToggle(agent.id)}
+        style={{ padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', cursor: maxed ? 'default' : 'pointer' }}
+      >
+        {/* Checkbox */}
+        <div style={{
+          width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+          border: `1.5px solid ${isSel ? C.lime : C.border2}`,
+          background: isSel ? C.lime : 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all 0.15s',
+        }}>
+          {isSel && <span style={{ fontSize: 11, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+        </div>
+
+        {/* Avatar */}
+        <div style={{ width: 42, height: 42, borderRadius: 8, border: `2px solid ${color}44`, background: C.surface2, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {agent.profilePic && !imgError
+            ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImgError(true)} />
+            : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 17, color: color }}>{agent.name?.[0]}</span>
+          }
+        </div>
+
+        {/* Name + reason */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 15, color: C.textPrimary }}>{agent.name}</span>
+            {cat && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700, color: color, background: `${color}15`, border: `1px solid ${color}33`, borderRadius: 4, padding: '2px 6px', letterSpacing: 0.5 }}>{cat}</span>}
+          </div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.35 }}>{agent.matchInfo?.reason}</div>
+        </div>
+
+        {/* Links + expand toggle */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+          <AgentLinks agent={agent} />
+          <button
+            onClick={handleExpand}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, padding: 0 }}
+          >
+            {expanded ? 'LESS ▲' : 'MORE ▼'}
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 16px 16px' }}>
+          {profileLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 12, height: 12, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite' }} />
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>Loading...</span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Description */}
+              {rich.description && (
+                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.55 }}>{rich.description}</div>
+              )}
+
+              {/* Metrics grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                {metrics.map(({ label, value, highlight }) => (
+                  <div key={label} style={{ background: C.surface2, borderRadius: 7, padding: '8px 10px', border: `1px solid ${C.border}` }}>
+                    <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: highlight ? C.lime : C.textPrimary, fontWeight: 700 }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Sparkline */}
+              {agent.past7dVolume?.length >= 2 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1 }}>7D VOLUME</span>
+                  <Sparkline data={agent.past7dVolume} width={120} height={24} />
+                </div>
+              )}
+
+              {/* Offerings */}
+              {offerings.length > 0 && (
+                <div>
+                  <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 8 }}>OFFERINGS ({offerings.length})</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {offerings.slice(0, 8).map((o) => (
+                      <div key={o.id ?? o.name} style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 6, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textPrimary }}>{o.name}</span>
+                        {o.price != null && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime }}>{o.price} VIRTUAL</span>}
+                      </div>
+                    ))}
+                    {offerings.length > 8 && (
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, padding: '5px 10px' }}>+{offerings.length - 8} more</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Done screen ──────────────────────────────────────────────────────────────
 function DoneScreen({ saved, query, onRestart, onHistory }) {
+  const isDesktop = useIsDesktop()
   const [selected, setSelected] = useState(new Set())
   const [comparing, setComparing] = useState(false)
 
@@ -1134,166 +1294,62 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
   const showCompareBar = selected.size >= 2
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px', paddingBottom: showCompareBar ? 120 : 32 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: C.lime,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, color: '#0A0A0A',
-          }}>⬡</div>
-          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>
-            TRENCHFINDER
-          </span>
+    <div style={{ minHeight: '100vh', padding: isDesktop ? '32px 40px' : '32px 16px', paddingBottom: showCompareBar ? 120 : 40, maxWidth: isDesktop ? 1100 : 520, margin: '0 auto', boxSizing: 'border-box' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
+        <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#0A0A0A' }}>⬡</div>
+        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHFINDER</span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.textPrimary, marginBottom: 8, letterSpacing: -0.5 }}>Your shortlist</h2>
+          {query && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '6px 12px' }}>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>QUERY</span>
+              <span style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, fontStyle: 'italic' }}>"{query}"</span>
+            </div>
+          )}
         </div>
-
-        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 30, color: C.textPrimary, marginBottom: 10, letterSpacing: -0.5 }}>
-          Your shortlist
-        </h2>
-
-        {/* Query pill */}
-        {query && (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: C.surface2, border: `1px solid ${C.border2}`,
-            borderRadius: 8, padding: '8px 12px', marginBottom: 16,
-          }}>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>QUERY</span>
-            <span style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, fontStyle: 'italic' }}>"{query}"</span>
-          </div>
-        )}
-
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: saved.length > 1 ? 10 : 20 }}>
-          {saved.length === 0
-            ? 'No agents saved this round. Try a new search!'
-            : `${saved.length} agent${saved.length > 1 ? 's' : ''} saved. Ready to hire.`}
-        </p>
-
-        {saved.length > 1 && (
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
-            TAP TO SELECT · COMPARE UP TO 4
-          </div>
-        )}
-
-        {/* Saved list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
-          {saved.map((agent) => {
-            const isSel = selected.has(agent.id)
-            const maxed = selected.size >= 4 && !isSel
-            return (
-              <div
-                key={agent.id}
-                onClick={() => !maxed && toggleSelect(agent.id)}
-                style={{
-                  background: C.surface, border: `1px solid ${isSel ? C.lime : C.border2}`,
-                  boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
-                  borderRadius: 8, padding: '14px 16px',
-                  display: 'flex', gap: 12, alignItems: 'center',
-                  cursor: maxed ? 'default' : 'pointer',
-                  opacity: maxed ? 0.45 : 1,
-                  transition: 'border-color 0.15s, box-shadow 0.15s',
-                }}
-              >
-                {/* Checkbox */}
-                <div style={{
-                  width: 18, height: 18, borderRadius: 4, flexShrink: 0,
-                  border: `1.5px solid ${isSel ? C.lime : C.border2}`,
-                  background: isSel ? C.lime : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.15s',
-                }}>
-                  {isSel && <span style={{ fontSize: 12, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
-                </div>
-
-                <div style={{
-                  width: 40, height: 40, borderRadius: 6,
-                  border: `1px solid ${C.border2}`, background: C.surface2,
-                  overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  {agent.profilePic ? (
-                    <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                  ) : (
-                    <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textMuted }}>{agent.name?.[0]}</span>
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 15, color: C.textPrimary, marginBottom: 2 }}>
-                    {agent.name}
-                  </div>
-                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.4 }}>
-                    {agent.matchInfo?.reason}
-                  </div>
-                </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <AgentLinks agent={agent} />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={onRestart}
-            style={{
-              flex: 1, padding: '14px',
-              background: C.lime,
-              border: 'none', borderRadius: 8, cursor: 'pointer',
-              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15,
-              color: '#0A0A0A', letterSpacing: 2,
-            }}
-          >
-            SCOUT AGAIN
-          </button>
-          <button
-            onClick={onHistory}
-            style={{
-              padding: '14px 18px',
-              background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, cursor: 'pointer',
-              fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, letterSpacing: 1,
-            }}
-          >
-            HISTORY
-          </button>
+        <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+          <button onClick={onRestart} style={{ padding: '11px 20px', background: C.lime, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: '#0A0A0A', letterSpacing: 1 }}>SCOUT AGAIN</button>
+          <button onClick={onHistory} style={{ padding: '11px 16px', background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, letterSpacing: 1 }}>HISTORY</button>
         </div>
       </div>
 
+      {saved.length === 0 ? (
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted }}>No agents saved this round. Try a new search!</div>
+      ) : (
+        <>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
+            {saved.length} AGENT{saved.length !== 1 ? 'S' : ''} · TAP TO SELECT · COMPARE UP TO 4 · EXPAND FOR DETAILS
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isDesktop && saved.length > 1 ? 'repeat(2, 1fr)' : '1fr',
+            gap: 10,
+            alignItems: 'start',
+          }}>
+            {saved.map((agent) => (
+              <ShortlistCard
+                key={agent.id}
+                agent={agent}
+                isSel={selected.has(agent.id)}
+                maxed={selected.size >= 4 && !selected.has(agent.id)}
+                onToggle={toggleSelect}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Sticky compare bar */}
       {showCompareBar && (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-          background: C.surface, borderTop: `1px solid ${C.border2}`,
-          padding: '12px 16px 24px',
-          display: 'flex', justifyContent: 'center',
-        }}>
-          <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, flex: 1 }}>
-              {selected.size} SELECTED
-            </span>
-            <button
-              onClick={() => setComparing(true)}
-              style={{
-                background: C.lime, border: 'none', borderRadius: 8,
-                padding: '12px 24px', cursor: 'pointer',
-                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
-                color: '#0A0A0A', letterSpacing: 1,
-              }}
-            >
-              COMPARE {selected.size}
-            </button>
-            <button
-              onClick={() => setSelected(new Set())}
-              style={{
-                background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
-                padding: '12px 14px', cursor: 'pointer',
-                fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted,
-              }}
-            >
-              CLEAR
-            </button>
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: C.surface, borderTop: `1px solid ${C.border2}`, padding: '12px 24px 24px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: 900, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, flex: 1 }}>{selected.size} SELECTED</span>
+            <button onClick={() => setComparing(true)} style={{ background: C.lime, border: 'none', borderRadius: 8, padding: '12px 24px', cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}>COMPARE {selected.size}</button>
+            <button onClick={() => setSelected(new Set())} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted }}>CLEAR</button>
           </div>
         </div>
       )}
