@@ -1322,22 +1322,72 @@ function saveToHistory(entry) {
 }
 
 // ─── History screen ───────────────────────────────────────────────────────────
+function AgentRow({ agent, isSel, maxed, onToggle }) {
+  return (
+    <div
+      onClick={() => !maxed && onToggle(agent)}
+      style={{
+        display: 'flex', gap: 10, alignItems: 'center',
+        padding: '10px 12px', borderRadius: 8,
+        border: `1px solid ${isSel ? C.lime : C.border}`,
+        boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
+        background: isSel ? `${C.lime}08` : 'transparent',
+        cursor: maxed ? 'default' : 'pointer',
+        opacity: maxed ? 0.4 : 1,
+        transition: 'border-color 0.15s, background 0.15s',
+      }}
+    >
+      <div style={{
+        width: 16, height: 16, borderRadius: 3, flexShrink: 0,
+        border: `1.5px solid ${isSel ? C.lime : C.border2}`,
+        background: isSel ? C.lime : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.15s',
+      }}>
+        {isSel && <span style={{ fontSize: 11, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+      </div>
+      <div style={{ width: 36, height: 36, borderRadius: 7, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+        {agent.profilePic
+          ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textMuted }}>{agent.name?.[0]}</span>
+        }
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.35, marginTop: 2 }}>{agent.matchInfo?.reason}</div>
+      </div>
+      <a
+        href={agentUrl(agent)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '5px 10px', textDecoration: 'none', flexShrink: 0 }}
+      >VIEW →</a>
+    </div>
+  )
+}
+
 function HistoryScreen({ onBack }) {
+  const isDesktop = useIsDesktop()
   const [history, setHistory] = useState(loadHistory)
-  const [expanded, setExpanded] = useState(null)
-  const [selected, setSelected] = useState(new Map()) // id → agent object
+  const [expanded, setExpanded] = useState(() => {
+    const h = loadHistory()
+    return h.length > 0 ? h[0].id : null
+  })
+  const [selected, setSelected] = useState(new Map())
   const [comparing, setComparing] = useState(false)
 
   function clearAll() {
     localStorage.removeItem(HISTORY_KEY)
     setHistory([])
+    setExpanded(null)
     setSelected(new Map())
   }
 
   function handleExpand(sessionId) {
     setExpanded((prev) => {
       const next = prev === sessionId ? null : sessionId
-      setSelected(new Map()) // clear selections whenever switching or closing
+      setSelected(new Map())
       return next
     })
   }
@@ -1354,6 +1404,7 @@ function HistoryScreen({ onBack }) {
   const selectedAgents = Array.from(selected.values())
   const matchInfoMap = Object.fromEntries(selectedAgents.map((a) => [a.id, a.matchInfo]))
   const showCompareBar = selected.size >= 2
+  const activeSession = history.find((s) => s.id === expanded)
 
   if (history.length === 0) {
     return (
@@ -1368,102 +1419,169 @@ function HistoryScreen({ onBack }) {
     )
   }
 
+  // ── Shared header ──────────────────────────────────────────────────────────
+  const header = (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
+      <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 20, color: C.textPrimary }}>Search History</span>
+      <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
+    </div>
+  )
+
+  // ── Session list (shared between layouts) ──────────────────────────────────
+  const sessionList = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {history.map((session) => {
+        const isActive = expanded === session.id
+        return (
+          <button
+            key={session.id}
+            onClick={() => handleExpand(session.id)}
+            style={{
+              width: '100%', background: isActive ? `${C.lime}0A` : C.surface,
+              border: `1px solid ${isActive ? C.lime + '66' : C.border2}`,
+              borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+              padding: '14px 16px', transition: 'border-color 0.15s, background 0.15s',
+            }}
+          >
+            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 6 }}>
+              "{session.query}"
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>{session.date}</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: session.saved.length > 0 ? C.lime : C.textFaint }}>
+                {session.saved.length} SAVED
+              </span>
+            </div>
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  // ── Agent list for the active session ─────────────────────────────────────
+  const agentPanel = activeSession ? (
+    <div>
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 16, fontWeight: 600, color: C.textPrimary, lineHeight: 1.4, marginBottom: 4 }}>
+          "{activeSession.query}"
+        </div>
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>
+          {activeSession.date} · {activeSession.saved.length} SAVED · SELECT UP TO 4 TO COMPARE
+        </div>
+      </div>
+      {activeSession.saved.length === 0 ? (
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textFaint, padding: '32px 0', textAlign: 'center' }}>Nothing shortlisted this session</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {activeSession.saved.map((agent) => (
+            <AgentRow
+              key={agent.id}
+              agent={agent}
+              isSel={selected.has(agent.id)}
+              maxed={selected.size >= 4 && !selected.has(agent.id)}
+              onToggle={toggleSelect}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 200 }}>
+      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textFaint, letterSpacing: 1 }}>← SELECT A SESSION</div>
+    </div>
+  )
+
+  // ── Compare bar ───────────────────────────────────────────────────────────
+  const compareBar = showCompareBar && (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+      background: C.surface, borderTop: `1px solid ${C.border2}`,
+      padding: '12px 24px 24px',
+      display: 'flex', justifyContent: 'center',
+    }}>
+      <div style={{ width: '100%', maxWidth: 900, display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted }}>{selected.size} SELECTED</div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginTop: 1 }}>
+            {selectedAgents.map((a) => a.name).join(', ')}
+          </div>
+        </div>
+        <button
+          onClick={() => setComparing(true)}
+          style={{ background: C.lime, border: 'none', borderRadius: 8, padding: '12px 24px', cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 1 }}
+        >COMPARE {selected.size}</button>
+        <button
+          onClick={() => setSelected(new Map())}
+          style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted }}
+        >CLEAR</button>
+      </div>
+    </div>
+  )
+
+  // ── Desktop: two-column layout ────────────────────────────────────────────
+  if (isDesktop) {
+    return (
+      <div style={{ minHeight: '100vh', padding: '28px 32px', paddingBottom: showCompareBar ? 120 : 48, maxWidth: 1100, margin: '0 auto', boxSizing: 'border-box' }}>
+        {header}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          {/* Left: session list */}
+          <div style={{ width: 320, flexShrink: 0 }}>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 12 }}>
+              {history.length} SESSION{history.length !== 1 ? 'S' : ''}
+            </div>
+            {sessionList}
+          </div>
+          {/* Right: active session agents */}
+          <div style={{ flex: 1, minWidth: 0, background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 12, padding: '20px 24px' }}>
+            {agentPanel}
+          </div>
+        </div>
+        {compareBar}
+        {comparing && <CompareModal agents={selectedAgents} matchInfoMap={matchInfoMap} onClose={() => setComparing(false)} />}
+      </div>
+    )
+  }
+
+  // ── Mobile: accordion layout ──────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '28px 16px', paddingBottom: showCompareBar ? 120 : 40 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
-          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>Search History</span>
-          <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
-        </div>
-
+      <div style={{ width: '100%', maxWidth: 480 }}>
+        {header}
         <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
           OPEN A SESSION · TAP AGENTS TO SELECT · COMPARE UP TO 4
         </div>
-
-        {/* Sessions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {history.map((session) => (
-            <div key={session.id} style={{ background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 10, overflow: 'hidden' }}>
-              {/* Session header */}
+            <div key={session.id} style={{ background: C.surface, border: `1px solid ${expanded === session.id ? C.lime + '66' : C.border2}`, borderRadius: 10, overflow: 'hidden' }}>
               <button
                 onClick={() => handleExpand(session.id)}
-                style={{
-                  width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-                  padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, textAlign: 'left',
-                }}
+                style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, textAlign: 'left' }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 5 }}>
-                    "{session.query}"
-                  </div>
+                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 5 }}>"{session.query}"</div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint }}>{session.date}</span>
-                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: session.saved.length > 0 ? C.lime : C.textFaint }}>
-                      {session.saved.length} SAVED
-                    </span>
+                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: session.saved.length > 0 ? C.lime : C.textFaint }}>{session.saved.length} SAVED</span>
                   </div>
                 </div>
                 <span style={{ color: C.textFaint, fontSize: 13, flexShrink: 0, marginTop: 2 }}>{expanded === session.id ? '▲' : '▼'}</span>
               </button>
-
-              {/* Expanded agent list */}
               {expanded === session.id && (
                 <div style={{ borderTop: `1px solid ${C.border}`, padding: '10px 16px 14px' }}>
                   {session.saved.length === 0 ? (
                     <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, textAlign: 'center', padding: '8px 0' }}>Nothing shortlisted this session</div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {session.saved.map((agent) => {
-                        const isSel = selected.has(agent.id)
-                        const maxed = selected.size >= 4 && !isSel
-                        return (
-                          <div
-                            key={agent.id}
-                            onClick={() => !maxed && toggleSelect(agent)}
-                            style={{
-                              display: 'flex', gap: 10, alignItems: 'center',
-                              padding: '8px 10px', borderRadius: 7,
-                              border: `1px solid ${isSel ? C.lime : C.border}`,
-                              boxShadow: isSel ? `0 0 0 1px ${C.lime}33` : 'none',
-                              background: isSel ? `${C.lime}08` : 'transparent',
-                              cursor: maxed ? 'default' : 'pointer',
-                              opacity: maxed ? 0.4 : 1,
-                              transition: 'border-color 0.15s, background 0.15s',
-                            }}
-                          >
-                            {/* Checkbox */}
-                            <div style={{
-                              width: 16, height: 16, borderRadius: 3, flexShrink: 0,
-                              border: `1.5px solid ${isSel ? C.lime : C.border2}`,
-                              background: isSel ? C.lime : 'transparent',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              transition: 'all 0.15s',
-                            }}>
-                              {isSel && <span style={{ fontSize: 11, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
-                            </div>
-
-                            <div style={{ width: 32, height: 32, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                              {agent.profilePic
-                                ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                                : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textMuted }}>{agent.name?.[0]}</span>
-                              }
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
-                              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
-                            </div>
-                            <a
-                              href={agentUrl(agent)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}
-                            >VIEW →</a>
-                          </div>
-                        )
-                      })}
+                      {session.saved.map((agent) => (
+                        <AgentRow
+                          key={agent.id}
+                          agent={agent}
+                          isSel={selected.has(agent.id)}
+                          maxed={selected.size >= 4 && !selected.has(agent.id)}
+                          onToggle={toggleSelect}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1472,50 +1590,8 @@ function HistoryScreen({ onBack }) {
           ))}
         </div>
       </div>
-
-      {/* Sticky compare bar */}
-      {showCompareBar && (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-          background: C.surface, borderTop: `1px solid ${C.border2}`,
-          padding: '12px 16px 24px',
-          display: 'flex', justifyContent: 'center',
-        }}>
-          <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted }}>{selected.size} SELECTED</div>
-              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginTop: 1 }}>
-                {selectedAgents.map((a) => a.name).join(', ')}
-              </div>
-            </div>
-            <button
-              onClick={() => setComparing(true)}
-              style={{
-                background: C.lime, border: 'none', borderRadius: 8,
-                padding: '12px 24px', cursor: 'pointer',
-                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
-                color: '#0A0A0A', letterSpacing: 1,
-              }}
-            >
-              COMPARE {selected.size}
-            </button>
-            <button
-              onClick={() => setSelected(new Map())}
-              style={{
-                background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
-                padding: '12px 14px', cursor: 'pointer',
-                fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted,
-              }}
-            >
-              CLEAR
-            </button>
-          </div>
-        </div>
-      )}
-
-      {comparing && (
-        <CompareModal agents={selectedAgents} matchInfoMap={matchInfoMap} onClose={() => setComparing(false)} />
-      )}
+      {compareBar}
+      {comparing && <CompareModal agents={selectedAgents} matchInfoMap={matchInfoMap} onClose={() => setComparing(false)} />}
     </div>
   )
 }
