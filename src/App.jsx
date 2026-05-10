@@ -614,6 +614,25 @@ function DoneScreen({ saved, onRestart }) {
   )
 }
 
+// ─── Mock data (set MOCK = true to skip all API calls during UI dev) ──────────
+const MOCK = true
+
+const MOCK_AGENTS = [
+  { id: 1, name: 'Ethy AI', virtualAgentId: '19520', profilePic: null, successRate: 99.2, revenue: 572787, successfulJobCount: 1139030, uniqueBuyerCount: 7496, past7dVolume: [{ time: '2026-05-03', value: 100000 }, { time: '2026-05-04', value: 130000 }, { time: '2026-05-05', value: 120000 }, { time: '2026-05-06', value: 160000 }, { time: '2026-05-07', value: 210000 }] },
+  { id: 2, name: 'Trade Executor', virtualAgentId: '20001', profilePic: null, successRate: 96.5, revenue: 320000, successfulJobCount: 450000, uniqueBuyerCount: 3200, past7dVolume: [{ time: '2026-05-03', value: 80000 }, { time: '2026-05-04', value: 75000 }, { time: '2026-05-05', value: 60000 }, { time: '2026-05-06', value: 55000 }, { time: '2026-05-07', value: 50000 }] },
+  { id: 3, name: 'Luna', virtualAgentId: '18800', profilePic: null, successRate: 88.1, revenue: 95000, successfulJobCount: 210000, uniqueBuyerCount: 1800, past7dVolume: [{ time: '2026-05-03', value: 20000 }, { time: '2026-05-04', value: 22000 }, { time: '2026-05-05', value: 25000 }, { time: '2026-05-06', value: 28000 }, { time: '2026-05-07', value: 30000 }] },
+  { id: 4, name: 'Director', virtualAgentId: '17500', profilePic: null, successRate: 91.4, revenue: 180000, successfulJobCount: 320000, uniqueBuyerCount: 2400, past7dVolume: null },
+  { id: 5, name: 'Nox Analytics', virtualAgentId: '16200', profilePic: null, successRate: 97.8, revenue: 410000, successfulJobCount: 780000, uniqueBuyerCount: 5100, past7dVolume: [{ time: '2026-05-03', value: 60000 }, { time: '2026-05-04', value: 65000 }, { time: '2026-05-05', value: 72000 }, { time: '2026-05-06', value: 80000 }, { time: '2026-05-07', value: 95000 }] },
+]
+
+const MOCK_MATCHES = [
+  { id: 1, category: 'DeFi', reason: 'Highest volume DeFi agent with 99%+ success rate and 1M+ completed jobs.' },
+  { id: 2, category: 'Trading', reason: 'Specialises in automated trade execution across multiple DeFi protocols.' },
+  { id: 3, category: 'Social', reason: 'Manages social presence and community engagement for token projects.' },
+  { id: 4, category: 'Content', reason: 'Produces and distributes content for token launches and campaigns.' },
+  { id: 5, category: 'Analytics', reason: 'Provides real-time on-chain analytics and market signal alerts.' },
+]
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [screen, setScreen] = useState('search') // search | loading | results | done
@@ -658,6 +677,14 @@ export default function App() {
     setError(null)
     setScreen('loading')
     try {
+      if (MOCK) {
+        await new Promise((r) => setTimeout(r, 1800)) // simulate loading
+        setAgents(MOCK_AGENTS)
+        setMatches(MOCK_MATCHES)
+        setScreen('results')
+        return
+      }
+
       const allAgents = await fetchAgents()
       setAgents(allAgents)
 
