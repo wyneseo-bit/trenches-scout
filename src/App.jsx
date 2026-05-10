@@ -1,5 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
+// ─── Responsive hook ─────────────────────────────────────────────────────────
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768)
+  useEffect(() => {
+    const fn = () => setIsDesktop(window.innerWidth >= 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+  return isDesktop
+}
+
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
   bg: '#0A0A0A',
@@ -78,7 +89,8 @@ function Sparkline({ data, width = 80, height = 28 }) {
 // ─── Agent Modal ──────────────────────────────────────────────────────────────
 function AgentModal({ agent, matchInfo, onClose }) {
   const [imgError, setImgError] = useState(false)
-  const [profile, setProfile] = useState(null)  // rich data from /api/agents
+  const [profile, setProfile] = useState(null)
+  const isDesktop = useIsDesktop()
   const [profileLoading, setProfileLoading] = useState(true)
 
   useEffect(() => {
@@ -140,29 +152,32 @@ function AgentModal({ agent, matchInfo, onClose }) {
       style={{
         position: 'fixed', inset: 0, zIndex: 1000,
         background: 'rgba(0,0,0,0.75)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        display: 'flex', alignItems: isDesktop ? 'center' : 'flex-end', justifyContent: 'center',
         backdropFilter: 'blur(6px)',
+        padding: isDesktop ? '32px' : 0,
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 480,
+          width: '100%', maxWidth: 520,
           background: C.surface,
           border: `1px solid ${C.border2}`,
-          borderRadius: '16px 16px 0 0',
+          borderRadius: isDesktop ? 16 : '16px 16px 0 0',
           padding: '0 0 36px',
-          maxHeight: '92vh',
+          maxHeight: isDesktop ? '88vh' : '92vh',
           overflowY: 'auto',
           animation: 'slideUp 0.25s ease',
         }}
       >
-        <style>{`@keyframes slideUp { from { transform: translateY(60px); opacity:0 } to { transform: translateY(0); opacity:1 } }`}</style>
+        <style>{`@keyframes slideUp { from { transform: translateY(${isDesktop ? '20px' : '60px'}); opacity:0 } to { transform: translateY(0); opacity:1 } }`}</style>
 
-        {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 6px' }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2 }} />
-        </div>
+        {/* Handle — only on mobile */}
+        {!isDesktop && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 6px' }}>
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2 }} />
+          </div>
+        )}
 
         {/* ── Header ── */}
         <div style={{ padding: '10px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
@@ -572,108 +587,128 @@ function LoadingScreen() {
 // ─── Search screen ────────────────────────────────────────────────────────────
 function SearchScreen({ onSearch, onHistory }) {
   const [query, setQuery] = useState('')
+  const isDesktop = useIsDesktop()
   const chips = [
     'Automate my DeFi trades',
     'Create content for my token',
     'Analyze market signals',
     'Manage my social presence',
   ]
-
   const submit = () => { if (query.trim()) onSearch(query.trim()) }
 
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', paddingBottom: 100 }}>
-      <div style={{ width: '100%', maxWidth: 460 }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
+  const searchForm = (
+    <div style={{ width: '100%' }}>
+      {!isDesktop && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8,
-              background: C.lime,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, fontWeight: 800, color: '#0A0A0A',
-              fontFamily: 'Inter,system-ui,sans-serif',
-            }}>⬡</div>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: '#0A0A0A' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
-                TRENCHES SCOUT
-              </div>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>
-                ACP EXPLORER · LIVE DATA
-              </div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>ACP EXPLORER · LIVE DATA</div>
             </div>
           </div>
-          <button onClick={onHistory} style={{
-            background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6,
-            padding: '6px 12px', cursor: 'pointer',
-            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1,
-          }}>HISTORY</button>
+          <button onClick={onHistory} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1 }}>HISTORY</button>
         </div>
+      )}
 
-        {/* Headline */}
-        <h1 style={{
-          fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 38,
-          lineHeight: 1.1, marginBottom: 14, color: C.textPrimary, letterSpacing: -1,
-        }}>
-          Find your <span style={{ color: C.lime }}>perfect</span> agent
-        </h1>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: 32, lineHeight: 1.65 }}>
-          Describe what you need in plain English. Scout matches you with the best live ACP agents — no filters, no guessing.
-        </p>
+      <h1 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: isDesktop ? 44 : 36, lineHeight: 1.1, marginBottom: 14, color: C.textPrimary, letterSpacing: -1 }}>
+        Find your <span style={{ color: C.lime }}>perfect</span><br />ACP agent
+      </h1>
+      <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: 32, lineHeight: 1.65 }}>
+        Describe what you need in plain English. Scout scans 1,800+ live agents and matches the best ones — no filters, no guessing.
+      </p>
 
-        {/* Textarea */}
-        <textarea
-          rows={3}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
-          placeholder="e.g. I need an agent that automates my DeFi trades..."
-          style={{
-            width: '100%', background: C.surface, border: `1px solid ${query ? C.lime + 'AA' : C.border2}`,
-            borderRadius: 8, padding: '14px 16px',
-            fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textPrimary,
-            resize: 'none', outline: 'none', lineHeight: 1.6,
-            boxShadow: query ? `0 0 0 3px ${C.lime}18` : 'none',
-            transition: 'border-color 0.15s, box-shadow 0.15s',
-          }}
-        />
+      <textarea
+        rows={3}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
+        placeholder="e.g. I need an agent that automates my DeFi trades..."
+        style={{
+          width: '100%', background: C.surface, border: `1px solid ${query ? C.lime + 'AA' : C.border2}`,
+          borderRadius: 8, padding: '14px 16px',
+          fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textPrimary,
+          resize: 'none', outline: 'none', lineHeight: 1.6,
+          boxShadow: query ? `0 0 0 3px ${C.lime}18` : 'none',
+          transition: 'border-color 0.15s, box-shadow 0.15s',
+        }}
+      />
 
-        {/* Submit button */}
-        <button
-          onClick={submit}
-          disabled={!query.trim()}
-          style={{
-            width: '100%', marginTop: 10, padding: '14px',
-            background: query.trim() ? C.lime : C.surface2,
-            border: 'none', borderRadius: 8, cursor: query.trim() ? 'pointer' : 'not-allowed',
-            fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
-            color: query.trim() ? '#0A0A0A' : C.textFaint, letterSpacing: 2,
-            transition: 'background 0.15s, color 0.15s',
-          }}
-        >
-          SCOUT AGENTS
-        </button>
+      <button
+        onClick={submit}
+        disabled={!query.trim()}
+        style={{
+          width: '100%', marginTop: 10, padding: '14px',
+          background: query.trim() ? C.lime : C.surface2,
+          border: 'none', borderRadius: 8, cursor: query.trim() ? 'pointer' : 'not-allowed',
+          fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+          color: query.trim() ? '#0A0A0A' : C.textFaint, letterSpacing: 2,
+          transition: 'background 0.15s, color 0.15s',
+        }}
+      >
+        SCOUT AGENTS
+      </button>
 
-        {/* Chips */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
-          {chips.map((chip) => (
-            <button
-              key={chip}
-              onClick={() => setQuery(chip)}
-              style={{
-                background: 'none', border: `1px solid ${C.border2}`,
-                borderRadius: 6, padding: '6px 12px', cursor: 'pointer',
-                fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted,
-                transition: 'border-color 0.15s, color 0.15s',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
-            >
-              {chip}
-            </button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
+        {chips.map((chip) => (
+          <button
+            key={chip}
+            onClick={() => setQuery(chip)}
+            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, transition: 'border-color 0.15s, color 0.15s' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
+          >{chip}</button>
+        ))}
+      </div>
+    </div>
+  )
+
+  const howItWorks = (
+    <div style={{ width: '100%' }}>
+      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 2, marginBottom: 24 }}>HOW IT WORKS</div>
+      {[
+        { step: '01', title: 'Describe your need', body: 'Type what you want in plain English — no filters, no categories to pick from.' },
+        { step: '02', title: 'AI scans 1,800+ agents', body: 'We fetch live data from the ACP network and match agents by their actual offerings.' },
+        { step: '03', title: 'Swipe to shortlist', body: 'Swipe right to save an agent, left to skip. Your shortlist builds as you go.' },
+        { step: '04', title: 'Compare & hire', body: 'Compare shortlisted agents side by side, then jump straight to their Virtuals page.' },
+      ].map(({ step, title, body }) => (
+        <div key={step} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.lime, fontWeight: 700, flexShrink: 0, width: 24, paddingTop: 2 }}>{step}</div>
+          <div>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 4 }}>{title}</div>
+            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.55 }}>{body}</div>
+          </div>
+        </div>
+      ))}
+
+      <div style={{ marginTop: 8, padding: '14px 16px', background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 10 }}>
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 8 }}>POWERED BY</div>
+        <div style={{ display: 'flex', gap: 16 }}>
+          {[['1,800+', 'Live Agents'], ['3 Sort Keys', 'Volume · Revenue · Success'], ['AI Match', 'GPT-4o mini']].map(([val, label]) => (
+            <div key={label}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.lime, fontWeight: 700 }}>{val}</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textFaint, marginTop: 2 }}>{label}</div>
+            </div>
           ))}
         </div>
       </div>
+    </div>
+  )
+
+  if (isDesktop) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 32px 40px' }}>
+        <div style={{ width: '100%', maxWidth: 1000, display: 'flex', gap: 80, alignItems: 'center' }}>
+          <div style={{ flex: '0 0 460px' }}>{searchForm}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>{howItWorks}</div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', paddingBottom: 100 }}>
+      <div style={{ width: '100%', maxWidth: 460 }}>{searchForm}</div>
     </div>
   )
 }
@@ -683,6 +718,7 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
   const [deck, setDeck] = useState(matches)
   const [saved, setSaved] = useState([])
   const [expandedAgent, setExpandedAgent] = useState(null)
+  const isDesktop = useIsDesktop()
   const VISIBLE = 3
 
   const agentMap = Object.fromEntries(agents.map((a) => [a.id, a]))
@@ -703,37 +739,24 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
 
   const visibleDeck = deck.slice(0, VISIBLE)
 
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 16px' }}>
-      {/* Top bar */}
-      <div style={{ width: '100%', maxWidth: 420, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <button onClick={onNewSearch} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1,
-        }}>← NEW SEARCH</button>
-        <div style={{
-          background: C.lime, borderRadius: 6, padding: '4px 12px',
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: '#0A0A0A', fontWeight: 700,
-        }}>
-          {saved.length} SAVED
+  const cardArea = (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {!isDesktop && (
+        <div style={{ width: '100%', maxWidth: 420, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <button onClick={onNewSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← NEW SEARCH</button>
+          <div style={{ background: C.lime, borderRadius: 6, padding: '4px 12px', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: '#0A0A0A', fontWeight: 700 }}>{saved.length} SAVED</div>
         </div>
-      </div>
+      )}
 
-      {/* Hint */}
       <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 20 }}>
-        SWIPE RIGHT TO SAVE · LEFT TO SKIP
+        {isDesktop ? 'CLICK ✕ TO SKIP · ✓ TO SAVE — OR DRAG THE CARD' : 'SWIPE RIGHT TO SAVE · LEFT TO SKIP'}
       </p>
 
-      {/* Card stack */}
-      <div style={{ position: 'relative', width: '100%', maxWidth: 420, height: 370 }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 420, height: 380 }}>
         {deck.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12 }}>
             <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 16, color: C.textMuted }}>No matches found</div>
-            <button onClick={onNewSearch} style={{
-              background: C.lime, border: 'none', borderRadius: 8, padding: '10px 20px',
-              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
-              color: '#0A0A0A', cursor: 'pointer', letterSpacing: 1,
-            }}>TRY AGAIN</button>
+            <button onClick={onNewSearch} style={{ background: C.lime, border: 'none', borderRadius: 8, padding: '10px 20px', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: '#0A0A0A', cursor: 'pointer', letterSpacing: 1 }}>TRY AGAIN</button>
           </div>
         ) : visibleDeck.map((match, i) => {
           const agent = agentMap[match.id]
@@ -753,35 +776,79 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
         })}
       </div>
 
-      {/* Action buttons */}
       {deck.length > 0 && (
-        <div style={{ display: 'flex', gap: 16, marginTop: 32 }}>
+        <div style={{ display: 'flex', gap: 16, marginTop: 28 }}>
           <button
             onClick={() => handleSwipe('left')}
-            style={{
-              width: 56, height: 56, borderRadius: 8,
-              background: 'none', border: `1px solid ${C.border2}`,
-              cursor: 'pointer', fontSize: 20, color: C.textMuted,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'border-color 0.15s, color 0.15s',
-            }}
+            style={{ width: 56, height: 56, borderRadius: 8, background: 'none', border: `1px solid ${C.border2}`, cursor: 'pointer', fontSize: 20, color: C.textMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s, color 0.15s' }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.color = C.red }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
           >✕</button>
           <button
             onClick={() => handleSwipe('right')}
-            style={{
-              width: 56, height: 56, borderRadius: 8,
-              background: C.lime, border: 'none',
-              cursor: 'pointer', fontSize: 20, color: '#0A0A0A',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700,
-            }}
+            style={{ width: 56, height: 56, borderRadius: 8, background: C.lime, border: 'none', cursor: 'pointer', fontSize: 20, color: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}
           >✓</button>
         </div>
       )}
+    </div>
+  )
 
-      {/* Expanded agent modal */}
+  const savedPanel = (
+    <div style={{ width: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Saved Agents</div>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>{saved.length} OF {matches.length} SAVED</div>
+        </div>
+        <button onClick={onNewSearch} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1 }}>← NEW SEARCH</button>
+      </div>
+
+      {saved.length === 0 ? (
+        <div style={{ padding: '32px 20px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 24, color: C.textFaint, marginBottom: 10 }}>◌</div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>Swipe right or click ✓ to save agents here</div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {saved.map((agent) => (
+            <div key={agent.id} style={{ background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {agent.profilePic
+                  ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textMuted }}>{agent.name?.[0]}</span>}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 13, color: C.textPrimary }}>{agent.name}</div>
+                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.matchInfo?.reason}</div>
+              </div>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.lime, flexShrink: 0 }} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {deck.length === 0 && saved.length > 0 && (
+        <button
+          onClick={() => onDone(saved)}
+          style={{ width: '100%', marginTop: 16, padding: '13px', background: C.lime, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 2 }}
+        >
+          VIEW SHORTLIST →
+        </button>
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: isDesktop ? 'center' : 'flex-start', padding: isDesktop ? '80px 32px 40px' : '20px 16px' }}>
+      {isDesktop ? (
+        <div style={{ width: '100%', maxWidth: 960, display: 'flex', gap: 60, alignItems: 'flex-start' }}>
+          <div style={{ flex: '0 0 440px' }}>{cardArea}</div>
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 44 }}>{savedPanel}</div>
+        </div>
+      ) : (
+        cardArea
+      )}
+
       {expandedAgent && (
         <AgentModal
           agent={expandedAgent.agent}
@@ -1438,12 +1505,56 @@ function HistoryScreen({ onBack }) {
   )
 }
 
-// ─── Bottom tab nav ───────────────────────────────────────────────────────────
+// ─── Tab nav — bottom on mobile, top bar on desktop ──────────────────────────
 function BottomNav({ active, onChange }) {
+  const isDesktop = useIsDesktop()
   const tabs = [
     { id: 'search',   label: 'SCOUT',    icon: '⌕' },
     { id: 'discover', label: 'DISCOVER', icon: '✦' },
   ]
+
+  if (isDesktop) {
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: `${C.bg}F0`, borderBottom: `1px solid ${C.border2}`,
+        backdropFilter: 'blur(12px)',
+        display: 'flex', justifyContent: 'center',
+      }}>
+        <div style={{ display: 'flex', width: '100%', maxWidth: 1100, padding: '0 32px', alignItems: 'center', height: 56, justifyContent: 'space-between' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#0A0A0A', fontWeight: 800 }}>⬡</div>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</span>
+          </div>
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            {tabs.map((tab) => {
+              const isActive = active === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onChange(tab.id)}
+                  style={{
+                    background: isActive ? `${C.lime}15` : 'none',
+                    border: `1px solid ${isActive ? C.lime + '55' : 'transparent'}`,
+                    borderRadius: 6, cursor: 'pointer',
+                    padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 7,
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: isActive ? C.lime : C.textFaint }}>{tab.icon}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          {/* Right slot — empty placeholder for balance */}
+          <div style={{ width: 150 }} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
@@ -1464,10 +1575,7 @@ function BottomNav({ active, onChange }) {
               }}
             >
               <span style={{ fontSize: 18, color: isActive ? C.lime : C.textFaint, lineHeight: 1 }}>{tab.icon}</span>
-              <span style={{
-                fontFamily: 'JetBrains Mono,monospace', fontSize: 9, letterSpacing: 1,
-                color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400,
-              }}>{tab.label}</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
             </button>
           )
         })}
@@ -1540,20 +1648,26 @@ function MiniAgentCard({ agent, onExpand }) {
 }
 
 // ─── Discovery section row ────────────────────────────────────────────────────
-function DiscoverSection({ title, subtitle, agents, loading, emptyMsg, onExpand }) {
+function DiscoverSection({ title, subtitle, agents, loading, emptyMsg, onExpand, isDesktop }) {
   return (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ padding: '0 16px', marginBottom: 12 }}>
-        <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary, marginBottom: 3 }}>{title}</div>
-        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted }}>{subtitle}</div>
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ padding: isDesktop ? '0 32px' : '0 16px', marginBottom: 14 }}>
+        <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: isDesktop ? 18 : 16, color: C.textPrimary, marginBottom: 3 }}>{title}</div>
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted }}>{subtitle}</div>
       </div>
       {loading ? (
-        <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ padding: isDesktop ? '20px 32px' : '20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
           <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading...</span>
         </div>
       ) : agents.length === 0 ? (
-        <div style={{ padding: '16px', fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>{emptyMsg}</div>
+        <div style={{ padding: isDesktop ? '16px 32px' : '16px', fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>{emptyMsg}</div>
+      ) : isDesktop ? (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, padding: '4px 32px 8px' }}>
+          {agents.map((agent) => (
+            <MiniAgentCard key={agent.id} agent={agent} onExpand={onExpand} />
+          ))}
+        </div>
       ) : (
         <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 16px 8px', scrollbarWidth: 'none' }}>
           {agents.map((agent) => (
@@ -1575,6 +1689,7 @@ function DiscoverScreen() {
   const [loadingTrend,setLoadingTrend]= useState(true)
   const [loadingNew,  setLoadingNew]  = useState(true)
   const [expandedAgent, setExpandedAgent] = useState(null)
+  const isDesktop = useIsDesktop()
 
   // ── helpers ──
   function parseItems(res) {
@@ -1677,26 +1792,29 @@ function DiscoverScreen() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, paddingBottom: 80 }}>
+    <div style={{ minHeight: '100vh', background: C.bg, paddingBottom: 80, paddingTop: isDesktop ? 56 : 0 }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } ::-webkit-scrollbar { display: none; }`}</style>
 
       {/* Header */}
-      <div style={{ padding: '24px 16px 16px', maxWidth: 480, margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#0A0A0A' }}>⬡</div>
-          <div>
-            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
+      <div style={{ padding: isDesktop ? '40px 32px 24px' : '24px 16px 16px', maxWidth: isDesktop ? 1100 : 480, margin: '0 auto' }}>
+        {!isDesktop && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#0A0A0A' }}>⬡</div>
+            <div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
+            </div>
           </div>
-        </div>
-        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 24, color: C.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>
+        )}
+        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: isDesktop ? 32 : 24, color: C.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>
           Discover Agents
         </h2>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted }}>
           Trending, new, and personalised picks from the ACP network.
         </p>
       </div>
 
+      <div style={{ maxWidth: isDesktop ? 1100 : '100%', margin: '0 auto' }}>
       {/* Recommended */}
       <DiscoverSection
         title="Recommended for You"
@@ -1705,6 +1823,7 @@ function DiscoverScreen() {
         loading={loadingRec}
         emptyMsg="No history yet — run a search to get recommendations."
         onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+        isDesktop={isDesktop}
       />
 
       {/* Trending */}
@@ -1715,6 +1834,7 @@ function DiscoverScreen() {
         loading={loadingTrend}
         emptyMsg="Could not load trending agents."
         onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+        isDesktop={isDesktop}
       />
 
       {/* New & Rising */}
@@ -1725,7 +1845,10 @@ function DiscoverScreen() {
         loading={loadingNew}
         emptyMsg="No new agents found in the last 30 days."
         onExpand={(agent) => setExpandedAgent({ agent, matchInfo: null })}
+        isDesktop={isDesktop}
       />
+
+      </div>
 
       {/* Agent detail modal */}
       {expandedAgent && (
@@ -1873,6 +1996,7 @@ export default function App() {
   }
 
   const showBottomNav = screen === 'search' || screen === 'discover'
+  const isDesktop = useIsDesktop()
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg }}>
