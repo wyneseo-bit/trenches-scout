@@ -79,20 +79,59 @@ function Sparkline({ data, width = 80, height = 28 }) {
 // ─── Agent Modal ──────────────────────────────────────────────────────────────
 function AgentModal({ agent, matchInfo, onClose }) {
   const [imgError, setImgError] = useState(false)
-  const successDot = agent.successRate > 95 ? C.green : agent.successRate > 80 ? '#FFB347' : C.red
+  const [profile, setProfile] = useState(null)  // rich data from /api/agents
+  const [profileLoading, setProfileLoading] = useState(true)
 
-  const lastActive = agent.lastActiveAt
-    ? new Date(agent.lastActiveAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  useEffect(() => {
+    if (MOCK) {
+      // mock profile data so it works in dev without hitting the API
+      setTimeout(() => {
+        setProfile({
+          description: 'This is a demo agent description. In production this is fetched live from the Virtuals ACP API and shows what the agent actually does, its capabilities, and supported operations.',
+          symbol: 'DEMO',
+          category: 'ON_CHAIN',
+          role: 'HYBRID',
+          twitterHandle: 'virtuals_io',
+          hasGraduated: true,
+          enabledChains: [{ id: 8453, name: 'BASE' }],
+          offerings: [
+            { id: 1, name: 'Token Swap', price: 0.5, priceUsd: 0.45, slaMinutes: 5 },
+            { id: 2, name: 'Market Analysis', price: 1.0, priceUsd: 0.90, slaMinutes: 15 },
+          ],
+          metrics: { isOnline: agent.successRate > 90, rating: 4.5, minsFromLastOnlineTime: 12 },
+        })
+        setProfileLoading(false)
+      }, 400)
+      return
+    }
+    fetch(`https://acpx.virtuals.io/api/agents?filters[id][$eq]=${agent.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const item = Array.isArray(data) ? data[0] : data?.data?.[0] ?? data
+        setProfile(item ?? null)
+      })
+      .catch(() => setProfile(null))
+      .finally(() => setProfileLoading(false))
+  }, [agent.id])
+
+  const rich = profile ?? {}
+  const metricsData = rich.metrics ?? {}
+  const isOnline = metricsData.isOnline ?? false
+  const rating = metricsData.rating ?? rich.rating ?? null
+  const successDot = isOnline ? C.green : (agent.successRate > 95 ? C.green : agent.successRate > 80 ? '#FFB347' : C.red)
+
+  const lastActive = (metricsData.lastActiveAt ?? agent.lastActiveAt)
+    ? new Date(metricsData.lastActiveAt ?? agent.lastActiveAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     : null
 
-  const metrics = [
+  const perfMetrics = [
     { label: 'SUCCESS RATE', value: agent.successRate != null ? `${agent.successRate.toFixed(2)}%` : '—' },
     { label: 'TOTAL VOLUME', value: fmtMoney(agent.volume ?? agent.grossAgenticAmount) },
     { label: 'REVENUE', value: fmtMoney(agent.revenue) },
     { label: 'JOBS DONE', value: fmtCount(agent.successfulJobCount) },
     { label: 'UNIQUE BUYERS', value: fmtCount(agent.uniqueBuyerCount) },
     { label: 'MEMOS', value: fmtCount(agent.memoCount) },
-    { label: 'OFFERINGS', value: agent.offeringsCount != null ? `${agent.offeringsCount}` : '—' },
+    { label: 'TX COUNT', value: fmtCount(metricsData.transactionCount) },
     { label: '7D VOLUME', value: agent.past7dVolume?.length ? fmtMoney(agent.past7dVolume.reduce((s, d) => s + d.value, 0)) : '—' },
   ]
 
@@ -101,9 +140,9 @@ function AgentModal({ agent, matchInfo, onClose }) {
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 1000,
-        background: 'rgba(0,0,0,0.7)',
+        background: 'rgba(0,0,0,0.75)',
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        backdropFilter: 'blur(4px)',
+        backdropFilter: 'blur(6px)',
       }}
     >
       <div
@@ -113,79 +152,124 @@ function AgentModal({ agent, matchInfo, onClose }) {
           background: C.surface,
           border: `1px solid ${C.border2}`,
           borderRadius: '16px 16px 0 0',
-          padding: '0 0 32px',
-          maxHeight: '90vh',
+          padding: '0 0 36px',
+          maxHeight: '92vh',
           overflowY: 'auto',
           animation: 'slideUp 0.25s ease',
         }}
       >
         <style>{`@keyframes slideUp { from { transform: translateY(60px); opacity:0 } to { transform: translateY(0); opacity:1 } }`}</style>
 
-        {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px' }}>
+        {/* Handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 6px' }}>
           <div style={{ width: 36, height: 4, borderRadius: 2, background: C.border2 }} />
         </div>
 
-        {/* Header */}
-        <div style={{ padding: '12px 20px 20px', borderBottom: `1px solid ${C.border}` }}>
+        {/* ── Header ── */}
+        <div style={{ padding: '10px 20px 18px', borderBottom: `1px solid ${C.border}` }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             {/* Avatar */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{
-                width: 72, height: 72, borderRadius: 12,
-                border: `1px solid ${C.border2}`, background: C.surface2,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-              }}>
+              <div style={{ width: 72, height: 72, borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface2, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {agent.profilePic && !imgError
                   ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 28, color: C.textMuted }}>{agent.name?.[0] ?? '?'}</span>
                 }
               </div>
-              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: successDot, border: `2px solid ${C.surface}` }} />
+              {/* Online indicator */}
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, borderRadius: '50%', background: isOnline ? C.green : C.textFaint, border: `2px solid ${C.surface}` }} />
             </div>
 
-            {/* Name + meta */}
+            {/* Name + badges */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary, marginBottom: 6 }}>
-                {agent.name}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>{agent.name}</span>
+                {rich.symbol && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime, fontWeight: 700 }}>${rich.symbol}</span>}
               </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                {/* Online/offline pill */}
+                <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '66' : C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                  {isOnline ? '● ONLINE' : '○ OFFLINE'}
+                </span>
                 {matchInfo?.category && (
                   <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                     {matchInfo.category}
                   </span>
                 )}
-                {agent.isVirtualAgent && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
-                    VIRTUAL AGENT
+                {rich.category && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    {rich.category}
                   </span>
                 )}
-                {agent.tag && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
-                    {agent.tag.toUpperCase()}
+                {rich.hasGraduated && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    GRADUATED
+                  </span>
+                )}
+                {agent.isVirtualAgent && (
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                    VIRTUAL
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Close */}
-            <button onClick={onClose} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+            <button onClick={onClose} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
           </div>
 
-          {/* Match reason */}
+          {/* Description */}
+          {profileLoading ? (
+            <div style={{ marginTop: 14, padding: '12px 14px', background: C.surface2, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading agent profile...</span>
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          ) : rich.description ? (
+            <div style={{ marginTop: 14, padding: '12px 14px', background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>DESCRIPTION</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.6 }}>{rich.description}</div>
+            </div>
+          ) : null}
+
+          {/* Why it matches */}
           {matchInfo?.reason && (
-            <div style={{ marginTop: 14, padding: '10px 14px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 8 }}>
+            <div style={{ marginTop: 10, padding: '10px 14px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 8 }}>
               <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY IT MATCHES</div>
               <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{matchInfo.reason}</div>
             </div>
           )}
         </div>
 
-        {/* Metrics grid */}
+        {/* ── Body ── */}
         <div style={{ padding: '16px 20px 0' }}>
+
+          {/* Rating + chains + twitter row */}
+          {!profileLoading && (rating || rich.enabledChains?.length || rich.twitterHandle) && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+              {rating != null && (
+                <div style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 13 }}>★</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textPrimary, fontWeight: 700 }}>{Number(rating).toFixed(1)}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>RATING</span>
+                </div>
+              )}
+              {rich.enabledChains?.map((c) => (
+                <div key={c.id} style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px' }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>⛓ {c.name}</span>
+                </div>
+              ))}
+              {rich.twitterHandle && (
+                <a href={`https://twitter.com/${rich.twitterHandle}`} target="_blank" rel="noopener noreferrer" style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>𝕏 @{rich.twitterHandle}</span>
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Metrics grid */}
           <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>PERFORMANCE METRICS</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
-            {metrics.map(({ label, value }) => (
+            {perfMetrics.map(({ label, value }) => (
               <div key={label} style={{ background: C.surface2, padding: '12px 14px' }}>
                 <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 4 }}>{label}</div>
                 <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 15, color: C.textPrimary, fontWeight: 700 }}>{value}</div>
@@ -198,22 +282,39 @@ function AgentModal({ agent, matchInfo, onClose }) {
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>7-DAY VOLUME TREND</div>
               <div style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 16px' }}>
-                <Sparkline data={agent.past7dVolume} width={340} height={52} />
+                <Sparkline data={agent.past7dVolume} height={52} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>
-                    {new Date(agent.past7dVolume[0].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                  </span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>
-                    {new Date(agent.past7dVolume[agent.past7dVolume.length - 1].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                  </span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>{new Date(agent.past7dVolume[0].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>{new Date(agent.past7dVolume[agent.past7dVolume.length - 1].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Offerings */}
+          {!profileLoading && rich.offerings?.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>OFFERINGS</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden' }}>
+                {rich.offerings.slice(0, 6).map((o) => (
+                  <div key={o.id} style={{ background: C.surface2, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                    <div>
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textPrimary, marginBottom: 2 }}>{o.name}</div>
+                      {o.slaMinutes && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>SLA {o.slaMinutes < 60 ? `${o.slaMinutes}m` : `${Math.round(o.slaMinutes / 60)}h`}</div>}
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.lime, fontWeight: 700 }}>{o.price} $VIRTUAL</div>
+                      {o.priceUsd != null && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>≈ ${o.priceUsd.toFixed(2)}</div>}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {/* Last active */}
           {lastActive && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, padding: '10px 14px', background: C.surface2, borderRadius: 8, border: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '10px 14px', background: C.surface2, borderRadius: 8, border: `1px solid ${C.border}` }}>
               <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1 }}>LAST ACTIVE</span>
               <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>{lastActive}</span>
             </div>
@@ -224,12 +325,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
             href={agentUrl(agent)}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'block', width: '100%', padding: '14px',
-              background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center',
-              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
-              color: '#0A0A0A', letterSpacing: 2,
-            }}
+            style={{ display: 'block', width: '100%', padding: '14px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 2 }}
           >
             VIEW ON VIRTUALS →
           </a>
