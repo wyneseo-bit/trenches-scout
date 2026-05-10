@@ -187,7 +187,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
               <div style={{ width: 72, height: 72, borderRadius: 12, border: `1px solid ${C.border2}`, background: C.surface2, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {agent.profilePic && !imgError
                   ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 28, color: C.textMuted }}>{agent.name?.[0] ?? '?'}</span>
+                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 30, color: C.textMuted }}>{agent.name?.[0] ?? '?'}</span>
                 }
               </div>
               {/* Online indicator */}
@@ -197,59 +197,59 @@ function AgentModal({ agent, matchInfo, onClose }) {
             {/* Name + badges */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>{agent.name}</span>
-                {rich.symbol && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime, fontWeight: 700 }}>${rich.symbol}</span>}
+                <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 20, color: C.textPrimary }}>{agent.name}</span>
+                {rich.symbol && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.lime, fontWeight: 700 }}>${rich.symbol}</span>}
               </div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {/* Online/offline pill */}
-                <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '66' : C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 600, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '66' : C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                   {isOnline ? '● ONLINE' : '○ OFFLINE'}
                 </span>
                 {matchInfo?.category && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 600, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 600, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                     {matchInfo.category}
                   </span>
                 )}
                 {rich.category && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                     {rich.category}
                   </span>
                 )}
                 {rich.hasGraduated && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                     GRADUATED
                   </span>
                 )}
                 {agent.isVirtualAgent && (
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 4, padding: '2px 7px', letterSpacing: 1 }}>
                     VIRTUAL
                   </span>
                 )}
               </div>
             </div>
 
-            <button onClick={onClose} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+            <button onClick={onClose} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
           </div>
 
           {/* Description */}
           {profileLoading ? (
             <div style={{ marginTop: 14, padding: '12px 14px', background: C.surface2, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
-              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading agent profile...</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint }}>Loading agent profile...</span>
               <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
           ) : rich.description ? (
             <div style={{ marginTop: 14, padding: '12px 14px', background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 8 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>DESCRIPTION</div>
-              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.6 }}>{rich.description}</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>DESCRIPTION</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, lineHeight: 1.6 }}>{rich.description}</div>
             </div>
           ) : null}
 
           {/* Why it matches */}
           {matchInfo?.reason && (
             <div style={{ marginTop: 10, padding: '10px 14px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 8 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY IT MATCHES</div>
-              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{matchInfo.reason}</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY IT MATCHES</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, lineHeight: 1.5 }}>{matchInfo.reason}</div>
             </div>
           )}
         </div>
@@ -262,31 +262,31 @@ function AgentModal({ agent, matchInfo, onClose }) {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
               {rating != null && (
                 <div style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 13 }}>★</span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textPrimary, fontWeight: 700 }}>{Number(rating).toFixed(1)}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>RATING</span>
+                  <span style={{ fontSize: 14 }}>★</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textPrimary, fontWeight: 700 }}>{Number(rating).toFixed(1)}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>RATING</span>
                 </div>
               )}
               {rich.enabledChains?.map((c) => (
                 <div key={c.id} style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px' }}>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>⛓ {c.name}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600 }}>⛓ {c.name}</span>
                 </div>
               ))}
               {rich.twitterHandle && (
                 <a href={`https://twitter.com/${rich.twitterHandle}`} target="_blank" rel="noopener noreferrer" style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '8px 12px', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>𝕏 @{rich.twitterHandle}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600 }}>𝕏 @{rich.twitterHandle}</span>
                 </a>
               )}
             </div>
           )}
 
           {/* Metrics grid */}
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>PERFORMANCE METRICS</div>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>PERFORMANCE METRICS</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
             {perfMetrics.map(({ label, value }) => (
               <div key={label} style={{ background: C.surface2, padding: '12px 14px' }}>
-                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 4 }}>{label}</div>
-                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 15, color: C.textPrimary, fontWeight: 700 }}>{value}</div>
+                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 16, color: C.textPrimary, fontWeight: 700 }}>{value}</div>
               </div>
             ))}
           </div>
@@ -294,12 +294,12 @@ function AgentModal({ agent, matchInfo, onClose }) {
           {/* 7-day chart */}
           {agent.past7dVolume?.length >= 2 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>7-DAY VOLUME TREND</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>7-DAY VOLUME TREND</div>
               <div style={{ background: C.surface2, border: `1px solid ${C.border2}`, borderRadius: 8, padding: '12px 16px' }}>
                 <Sparkline data={agent.past7dVolume} height={52} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>{new Date(agent.past7dVolume[0].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>{new Date(agent.past7dVolume[agent.past7dVolume.length - 1].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>{new Date(agent.past7dVolume[0].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>{new Date(agent.past7dVolume[agent.past7dVolume.length - 1].time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
                 </div>
               </div>
             </div>
@@ -308,17 +308,17 @@ function AgentModal({ agent, matchInfo, onClose }) {
           {/* Offerings */}
           {!profileLoading && rich.offerings?.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>OFFERINGS</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 10 }}>OFFERINGS</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: C.border, borderRadius: 8, overflow: 'hidden' }}>
                 {rich.offerings.slice(0, 6).map((o) => (
                   <div key={o.id} style={{ background: C.surface2, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                     <div>
-                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textPrimary, marginBottom: 2 }}>{o.name}</div>
-                      {o.slaMinutes && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>SLA {o.slaMinutes < 60 ? `${o.slaMinutes}m` : `${Math.round(o.slaMinutes / 60)}h`}</div>}
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textPrimary, marginBottom: 2 }}>{o.name}</div>
+                      {o.slaMinutes && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>SLA {o.slaMinutes < 60 ? `${o.slaMinutes}m` : `${Math.round(o.slaMinutes / 60)}h`}</div>}
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.lime, fontWeight: 700 }}>{o.price} $VIRTUAL</div>
-                      {o.priceUsd != null && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint }}>≈ ${o.priceUsd.toFixed(2)}</div>}
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 14, color: C.lime, fontWeight: 700 }}>{o.price} $VIRTUAL</div>
+                      {o.priceUsd != null && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint }}>≈ ${o.priceUsd.toFixed(2)}</div>}
                     </div>
                   </div>
                 ))}
@@ -329,8 +329,8 @@ function AgentModal({ agent, matchInfo, onClose }) {
           {/* Last active */}
           {lastActive && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '10px 14px', background: C.surface2, borderRadius: 8, border: `1px solid ${C.border}` }}>
-              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1 }}>LAST ACTIVE</span>
-              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600 }}>{lastActive}</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint, letterSpacing: 1 }}>LAST ACTIVE</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600 }}>{lastActive}</span>
             </div>
           )}
 
@@ -339,7 +339,7 @@ function AgentModal({ agent, matchInfo, onClose }) {
             href={agentUrl(agent)}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'block', width: '100%', padding: '14px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 2 }}
+            style={{ display: 'block', width: '100%', padding: '14px', background: C.lime, borderRadius: 8, textDecoration: 'none', textAlign: 'center', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: '#0A0A0A', letterSpacing: 2 }}
           >
             VIEW ON VIRTUALS →
           </a>
@@ -436,7 +436,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
         opacity: saveOpacity, pointerEvents: 'none', transition: 'opacity 0.1s',
         zIndex: 10,
       }}>
-        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.lime, letterSpacing: 6 }}>SAVE</span>
+        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 30, color: C.lime, letterSpacing: 6 }}>SAVE</span>
       </div>
 
       {/* SKIP overlay */}
@@ -448,13 +448,13 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
         opacity: skipOpacity, pointerEvents: 'none', transition: 'opacity 0.1s',
         zIndex: 10,
       }}>
-        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.red, letterSpacing: 6 }}>SKIP</span>
+        <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 30, color: C.red, letterSpacing: 6 }}>SKIP</span>
       </div>
 
       {/* Counter */}
       <div style={{
         position: 'absolute', top: 16, right: 20,
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: C.textFaint, fontWeight: 600,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: C.textFaint, fontWeight: 600,
       }}>
         {index === 0 ? `${total - index} / ${total}` : ''}
       </div>
@@ -478,7 +478,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 20, color: C.textMuted }}>
+              <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 22, color: C.textMuted }}>
                 {agent.name?.[0] ?? '?'}
               </span>
             )}
@@ -493,12 +493,12 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
         {/* Name + badge + reason */}
         <div style={{ flex: 1, minWidth: 0, paddingRight: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 5 }}>
-            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary }}>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>
               {agent.name}
             </span>
             {matchInfo?.category && (
               <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fontWeight: 600,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600,
                 color: C.textMuted,
                 border: `1px solid ${C.border2}`,
                 borderRadius: 4, padding: '2px 6px', letterSpacing: 1, textTransform: 'uppercase',
@@ -508,7 +508,7 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
             )}
           </div>
           {matchInfo?.reason && (
-            <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
+            <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>
               {matchInfo.reason}
             </p>
           )}
@@ -530,10 +530,10 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
           <div key={label} style={{
             background: C.surface2, padding: '10px 8px', textAlign: 'center',
           }}>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, fontWeight: 600, letterSpacing: 1, marginBottom: 4 }}>
               {label}
             </div>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textPrimary, fontWeight: 700 }}>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 14, color: C.textPrimary, fontWeight: 700 }}>
               {value}
             </div>
           </div>
@@ -545,11 +545,11 @@ function AgentCard({ agent, matchInfo, index, total, onSwipe, isTop, onExpand })
         <div style={{ flex: 1 }}>
           {agent.past7dVolume && agent.past7dVolume.length >= 2
             ? <Sparkline data={agent.past7dVolume} />
-            : <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>NO CHART DATA</span>
+            : <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint }}>NO CHART DATA</span>
           }
         </div>
         {isTop && (
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, flexShrink: 0, marginLeft: 12, cursor: 'default' }}>
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, flexShrink: 0, marginLeft: 12, cursor: 'default' }}>
             TAP FOR MORE
           </span>
         )}
@@ -576,7 +576,7 @@ function LoadingScreen() {
         borderTop: `2px solid ${C.lime}`,
         animation: 'spin 0.8s linear infinite',
       }} />
-      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, letterSpacing: 1 }}>
+      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 14, color: C.textMuted, letterSpacing: 1 }}>
         {msgs[msgIndex]}
       </span>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -601,20 +601,20 @@ function SearchScreen({ onSearch, onHistory }) {
       {!isDesktop && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800, color: '#0A0A0A' }}>⬡</div>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#0A0A0A' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>ACP EXPLORER · LIVE DATA</div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>ACP EXPLORER · LIVE DATA</div>
             </div>
           </div>
-          <button onClick={onHistory} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1 }}>HISTORY</button>
+          <button onClick={onHistory} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, letterSpacing: 1 }}>HISTORY</button>
         </div>
       )}
 
       <h1 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: isDesktop ? 44 : 36, lineHeight: 1.1, marginBottom: 14, color: C.textPrimary, letterSpacing: -1 }}>
         Find your <span style={{ color: C.lime }}>perfect</span><br />ACP agent
       </h1>
-      <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: 32, lineHeight: 1.65 }}>
+      <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 16, color: C.textMuted, marginBottom: 32, lineHeight: 1.65 }}>
         Describe what you need in plain English. Scout scans 1,800+ live agents and matches the best ones — no filters, no guessing.
       </p>
 
@@ -627,7 +627,7 @@ function SearchScreen({ onSearch, onHistory }) {
         style={{
           width: '100%', background: C.surface, border: `1px solid ${query ? C.lime + 'AA' : C.border2}`,
           borderRadius: 8, padding: '14px 16px',
-          fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textPrimary,
+          fontFamily: 'system-ui,sans-serif', fontSize: 16, color: C.textPrimary,
           resize: 'none', outline: 'none', lineHeight: 1.6,
           boxShadow: query ? `0 0 0 3px ${C.lime}18` : 'none',
           transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -641,7 +641,7 @@ function SearchScreen({ onSearch, onHistory }) {
           width: '100%', marginTop: 10, padding: '14px',
           background: query.trim() ? C.lime : C.surface2,
           border: 'none', borderRadius: 8, cursor: query.trim() ? 'pointer' : 'not-allowed',
-          fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+          fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15,
           color: query.trim() ? '#0A0A0A' : C.textFaint, letterSpacing: 2,
           transition: 'background 0.15s, color 0.15s',
         }}
@@ -654,7 +654,7 @@ function SearchScreen({ onSearch, onHistory }) {
           <button
             key={chip}
             onClick={() => setQuery(chip)}
-            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, transition: 'border-color 0.15s, color 0.15s' }}
+            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, transition: 'border-color 0.15s, color 0.15s' }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
           >{chip}</button>
@@ -665,7 +665,7 @@ function SearchScreen({ onSearch, onHistory }) {
 
   const howItWorks = (
     <div style={{ width: '100%' }}>
-      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 2, marginBottom: 24 }}>HOW IT WORKS</div>
+      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint, letterSpacing: 2, marginBottom: 24 }}>HOW IT WORKS</div>
       {[
         { step: '01', title: 'Describe your need', body: 'Type what you want in plain English — no filters, no categories to pick from.' },
         { step: '02', title: 'AI scans 1,800+ agents', body: 'We fetch live data from the ACP network and match agents by their actual offerings.' },
@@ -673,21 +673,21 @@ function SearchScreen({ onSearch, onHistory }) {
         { step: '04', title: 'Compare & hire', body: 'Compare shortlisted agents side by side, then jump straight to their Virtuals page.' },
       ].map(({ step, title, body }) => (
         <div key={step} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.lime, fontWeight: 700, flexShrink: 0, width: 24, paddingTop: 2 }}>{step}</div>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.lime, fontWeight: 700, flexShrink: 0, width: 24, paddingTop: 2 }}>{step}</div>
           <div>
-            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 4 }}>{title}</div>
-            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.55 }}>{body}</div>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 15, color: C.textPrimary, marginBottom: 4 }}>{title}</div>
+            <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, lineHeight: 1.55 }}>{body}</div>
           </div>
         </div>
       ))}
 
       <div style={{ marginTop: 8, padding: '14px 16px', background: C.surface, border: `1px solid ${C.border2}`, borderRadius: 10 }}>
-        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 8 }}>POWERED BY</div>
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 8 }}>POWERED BY</div>
         <div style={{ display: 'flex', gap: 16 }}>
           {[['1,800+', 'Live Agents'], ['3 Sort Keys', 'Volume · Revenue · Success'], ['AI Match', 'GPT-4o mini']].map(([val, label]) => (
             <div key={label}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.lime, fontWeight: 700 }}>{val}</div>
-              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textFaint, marginTop: 2 }}>{label}</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 14, color: C.lime, fontWeight: 700 }}>{val}</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginTop: 2 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -743,20 +743,20 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {!isDesktop && (
         <div style={{ width: '100%', maxWidth: 420, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <button onClick={onNewSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← NEW SEARCH</button>
-          <div style={{ background: C.lime, borderRadius: 6, padding: '4px 12px', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: '#0A0A0A', fontWeight: 700 }}>{saved.length} SAVED</div>
+          <button onClick={onNewSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← NEW SEARCH</button>
+          <div style={{ background: C.lime, borderRadius: 6, padding: '4px 12px', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: '#0A0A0A', fontWeight: 700 }}>{saved.length} SAVED</div>
         </div>
       )}
 
-      <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 20 }}>
+      <p style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint, letterSpacing: 1, marginBottom: 20 }}>
         {isDesktop ? 'CLICK ✕ TO SKIP · ✓ TO SAVE — OR DRAG THE CARD' : 'SWIPE RIGHT TO SAVE · LEFT TO SKIP'}
       </p>
 
       <div style={{ position: 'relative', width: '100%', maxWidth: 420, height: 380 }}>
         {deck.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12 }}>
-            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 16, color: C.textMuted }}>No matches found</div>
-            <button onClick={onNewSearch} style={{ background: C.lime, border: 'none', borderRadius: 8, padding: '10px 20px', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: '#0A0A0A', cursor: 'pointer', letterSpacing: 1 }}>TRY AGAIN</button>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 18, color: C.textMuted }}>No matches found</div>
+            <button onClick={onNewSearch} style={{ background: C.lime, border: 'none', borderRadius: 8, padding: '10px 20px', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', cursor: 'pointer', letterSpacing: 1 }}>TRY AGAIN</button>
           </div>
         ) : visibleDeck.map((match, i) => {
           const agent = agentMap[match.id]
@@ -780,13 +780,13 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
         <div style={{ display: 'flex', gap: 16, marginTop: 28 }}>
           <button
             onClick={() => handleSwipe('left')}
-            style={{ width: 56, height: 56, borderRadius: 8, background: 'none', border: `1px solid ${C.border2}`, cursor: 'pointer', fontSize: 20, color: C.textMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s, color 0.15s' }}
+            style={{ width: 56, height: 56, borderRadius: 8, background: 'none', border: `1px solid ${C.border2}`, cursor: 'pointer', fontSize: 22, color: C.textMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.15s, color 0.15s' }}
             onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.red; e.currentTarget.style.color = C.red }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
           >✕</button>
           <button
             onClick={() => handleSwipe('right')}
-            style={{ width: 56, height: 56, borderRadius: 8, background: C.lime, border: 'none', cursor: 'pointer', fontSize: 20, color: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}
+            style={{ width: 56, height: 56, borderRadius: 8, background: C.lime, border: 'none', cursor: 'pointer', fontSize: 22, color: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}
           >✓</button>
         </div>
       )}
@@ -797,16 +797,16 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
     <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Saved Agents</div>
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>{saved.length} OF {matches.length} SAVED</div>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>Saved Agents</div>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>{saved.length} OF {matches.length} SAVED</div>
         </div>
-        <button onClick={onNewSearch} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1 }}>← NEW SEARCH</button>
+        <button onClick={onNewSearch} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, letterSpacing: 1 }}>← NEW SEARCH</button>
       </div>
 
       {saved.length === 0 ? (
         <div style={{ padding: '32px 20px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 24, color: C.textFaint, marginBottom: 10 }}>◌</div>
-          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>Swipe right or click ✓ to save agents here</div>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 26, color: C.textFaint, marginBottom: 10 }}>◌</div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textFaint }}>Swipe right or click ✓ to save agents here</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -815,11 +815,11 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
               <div style={{ width: 36, height: 36, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {agent.profilePic
                   ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textMuted }}>{agent.name?.[0]}</span>}
+                  : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textMuted }}>{agent.name?.[0]}</span>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 13, color: C.textPrimary }}>{agent.name}</div>
-                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.matchInfo?.reason}</div>
+                <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary }}>{agent.name}</div>
+                <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.3, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.matchInfo?.reason}</div>
               </div>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.lime, flexShrink: 0 }} />
             </div>
@@ -830,7 +830,7 @@ function ResultsScreen({ matches, agents, onNewSearch, onDone }) {
       {deck.length === 0 && saved.length > 0 && (
         <button
           onClick={() => onDone(saved)}
-          style={{ width: '100%', marginTop: 16, padding: '13px', background: C.lime, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: '#0A0A0A', letterSpacing: 2 }}
+          style={{ width: '100%', marginTop: 16, padding: '13px', background: C.lime, border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: '#0A0A0A', letterSpacing: 2 }}
         >
           VIEW SHORTLIST →
         </button>
@@ -929,14 +929,14 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,
         }}>
           <div>
-            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Compare Agents</div>
-            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>
+            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>Compare Agents</div>
+            <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginTop: 2 }}>
               {agents.length} SELECTED{!isDesktop ? ' · SCROLL HORIZONTALLY' : ''}
             </div>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: C.textMuted, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >✕</button>
         </div>
 
@@ -966,18 +966,18 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                       <div style={{ width: 56, height: 56, borderRadius: 10, border: `1px solid ${C.border2}`, background: C.surface2, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {agent.profilePic
                           ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 22, color: C.textMuted }}>{agent.name?.[0]}</span>}
+                          : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 24, color: C.textMuted }}>{agent.name?.[0]}</span>}
                       </div>
                       <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: isOnline ? C.green : C.textFaint, border: `2px solid ${C.bg}` }} />
                     </div>
-                    <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, lineHeight: 1.3 }}>{agent.name}</div>
-                    {rich.symbol && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.lime, fontWeight: 700 }}>${rich.symbol}</div>}
+                    <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, lineHeight: 1.3 }}>{agent.name}</div>
+                    {rich.symbol && <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.lime, fontWeight: 700 }}>${rich.symbol}</div>}
                     <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '55' : C.border2}`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: isOnline ? C.green : C.textFaint, border: `1px solid ${isOnline ? C.green + '55' : C.border2}`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
                         {isOnline ? '● ONLINE' : '○ OFFLINE'}
                       </span>
                       {matchInfo?.category && (
-                        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
+                        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime, border: `1px solid ${C.lime}44`, borderRadius: 3, padding: '2px 5px', letterSpacing: 0.5 }}>
                           {matchInfo.category}
                         </span>
                       )}
@@ -985,7 +985,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                   </div>
 
                   {/* Metrics */}
-                  <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>METRICS</div>
+                  <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>METRICS</div>
                   {[
                     { label: 'SUCCESS', value: agent.successRate != null ? `${agent.successRate.toFixed(1)}%` : '—' },
                     { label: 'VOLUME', value: fmtMoney(agent.volume ?? agent.grossAgenticAmount) },
@@ -996,8 +996,8 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                     ...(rating != null ? [{ label: 'RATING', value: `★ ${rating.toFixed(1)}`, highlight: true }] : []),
                   ].map(({ label, value, highlight }) => (
                     <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: `1px solid ${C.border}` }}>
-                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>{label}</span>
-                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: highlight ? C.lime : C.textPrimary, fontWeight: 600 }}>{value}</span>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>{label}</span>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: highlight ? C.lime : C.textPrimary, fontWeight: 600 }}>{value}</span>
                     </div>
                   ))}
 
@@ -1005,39 +1005,39 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                   {!loaded ? (
                     <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <div style={{ width: 10, height: 10, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite' }} />
-                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>Loading...</span>
+                      <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading...</span>
                     </div>
                   ) : rich.description ? (
                     <div style={{ marginTop: 14 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>ABOUT</div>
-                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.5 }}>{rich.description}</div>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>ABOUT</div>
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{rich.description}</div>
                     </div>
                   ) : null}
 
                   {/* Why matched */}
                   {matchInfo?.reason && (
                     <div style={{ marginTop: 12, padding: '8px 10px', background: `${C.lime}0D`, border: `1px solid ${C.lime}22`, borderRadius: 7 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY MATCHED</div>
-                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.4 }}>{matchInfo.reason}</div>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime, letterSpacing: 1, marginBottom: 4 }}>WHY MATCHED</div>
+                      <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.4 }}>{matchInfo.reason}</div>
                     </div>
                   )}
 
                   {/* Offerings */}
                   {rich.offerings?.length > 0 && (
                     <div style={{ marginTop: 14 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>OFFERINGS ({rich.offerings.length})</div>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 6 }}>OFFERINGS ({rich.offerings.length})</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         {rich.offerings.slice(0, 3).map((o) => (
                           <div key={o.id} style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 6, padding: '6px 8px' }}>
-                            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 11, color: C.textPrimary, fontWeight: 500, marginBottom: 2 }}>{o.name}</div>
+                            <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 13, color: C.textPrimary, fontWeight: 500, marginBottom: 2 }}>{o.name}</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime }}>{o.price != null ? `${o.price} VIRTUAL` : '—'}</span>
-                              {o.slaMinutes && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>{o.slaMinutes}min SLA</span>}
+                              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime }}>{o.price != null ? `${o.price} VIRTUAL` : '—'}</span>
+                              {o.slaMinutes && <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>{o.slaMinutes}min SLA</span>}
                             </div>
                           </div>
                         ))}
                         {rich.offerings.length > 3 && (
-                          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, textAlign: 'center', paddingTop: 2 }}>+{rich.offerings.length - 3} more</div>
+                          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, textAlign: 'center', paddingTop: 2 }}>+{rich.offerings.length - 3} more</div>
                         )}
                       </div>
                     </div>
@@ -1046,10 +1046,10 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                   {/* Chains */}
                   {rich.enabledChains?.length > 0 && (
                     <div style={{ marginTop: 14 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>CHAINS</div>
+                      <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, letterSpacing: 1, marginBottom: 5 }}>CHAINS</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
                         {rich.enabledChains.map((c) => (
-                          <span key={c.id} style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 3, padding: '2px 5px' }}>{c.name}</span>
+                          <span key={c.id} style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, border: `1px solid ${C.border2}`, borderRadius: 3, padding: '2px 5px' }}>{c.name}</span>
                         ))}
                       </div>
                     </div>
@@ -1058,7 +1058,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                   {/* Twitter */}
                   {rich.twitterHandle && (
                     <div style={{ marginTop: 12 }}>
-                      <a href={`https://twitter.com/${rich.twitterHandle}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textMuted, textDecoration: 'none' }}>
+                      <a href={`https://twitter.com/${rich.twitterHandle}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, textDecoration: 'none' }}>
                         @{rich.twitterHandle} ↗
                       </a>
                     </div>
@@ -1071,7 +1071,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                     rel="noopener noreferrer"
                     style={{
                       display: 'block', marginTop: 16,
-                      fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700,
+                      fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700,
                       color: '#0A0A0A', background: C.lime,
                       borderRadius: 6, padding: '9px 0', textDecoration: 'none',
                       textAlign: 'center', letterSpacing: 1,
@@ -1116,14 +1116,14 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
             width: 32, height: 32, borderRadius: 8,
             background: C.lime,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, color: '#0A0A0A',
+            fontSize: 18, color: '#0A0A0A',
           }}>⬡</div>
-          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>
+          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>
             TRENCHES SCOUT
           </span>
         </div>
 
-        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 28, color: C.textPrimary, marginBottom: 10, letterSpacing: -0.5 }}>
+        <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: 30, color: C.textPrimary, marginBottom: 10, letterSpacing: -0.5 }}>
           Your shortlist
         </h2>
 
@@ -1134,19 +1134,19 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
             background: C.surface2, border: `1px solid ${C.border2}`,
             borderRadius: 8, padding: '8px 12px', marginBottom: 16,
           }}>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>QUERY</span>
-            <span style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, fontStyle: 'italic' }}>"{query}"</span>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>QUERY</span>
+            <span style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, fontStyle: 'italic' }}>"{query}"</span>
           </div>
         )}
 
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted, marginBottom: saved.length > 1 ? 10 : 20 }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted, marginBottom: saved.length > 1 ? 10 : 20 }}>
           {saved.length === 0
             ? 'No agents saved this round. Try a new search!'
             : `${saved.length} agent${saved.length > 1 ? 's' : ''} saved. Ready to hire.`}
         </p>
 
         {saved.length > 1 && (
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 14 }}>
             TAP TO SELECT · COMPARE UP TO 4
           </div>
         )}
@@ -1178,7 +1178,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.15s',
                 }}>
-                  {isSel && <span style={{ fontSize: 10, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                  {isSel && <span style={{ fontSize: 12, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
                 </div>
 
                 <div style={{
@@ -1190,14 +1190,14 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
                   {agent.profilePic ? (
                     <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
                   ) : (
-                    <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
+                    <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textMuted }}>{agent.name?.[0]}</span>
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 14, color: C.textPrimary, marginBottom: 2 }}>
+                  <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 15, color: C.textPrimary, marginBottom: 2 }}>
                     {agent.name}
                   </div>
-                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textMuted, lineHeight: 1.4 }}>
+                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.4 }}>
                     {agent.matchInfo?.reason}
                   </div>
                 </div>
@@ -1207,7 +1207,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                   style={{
-                    fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
+                    fontFamily: 'JetBrains Mono,monospace', fontSize: 12, fontWeight: 700,
                     color: '#0A0A0A', background: C.lime,
                     borderRadius: 6, padding: '6px 12px', textDecoration: 'none', flexShrink: 0,
                   }}
@@ -1226,7 +1226,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
               flex: 1, padding: '14px',
               background: C.lime,
               border: 'none', borderRadius: 8, cursor: 'pointer',
-              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
+              fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15,
               color: '#0A0A0A', letterSpacing: 2,
             }}
           >
@@ -1237,7 +1237,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
             style={{
               padding: '14px 18px',
               background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, cursor: 'pointer',
-              fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, letterSpacing: 1,
+              fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, letterSpacing: 1,
             }}
           >
             HISTORY
@@ -1254,7 +1254,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
           display: 'flex', justifyContent: 'center',
         }}>
           <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, flex: 1 }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, flex: 1 }}>
               {selected.size} SELECTED
             </span>
             <button
@@ -1262,7 +1262,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
               style={{
                 background: C.lime, border: 'none', borderRadius: 8,
                 padding: '12px 24px', cursor: 'pointer',
-                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
+                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
                 color: '#0A0A0A', letterSpacing: 1,
               }}
             >
@@ -1273,7 +1273,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
               style={{
                 background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
                 padding: '12px 14px', cursor: 'pointer',
-                fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted,
+                fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted,
               }}
             >
               CLEAR
@@ -1359,10 +1359,10 @@ function HistoryScreen({ onBack }) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 16px' }}>
         <div style={{ width: '100%', maxWidth: 420, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 32, color: C.textFaint, marginBottom: 16 }}>◌</div>
-          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 16, color: C.textMuted, marginBottom: 8 }}>No history yet</div>
-          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginBottom: 28 }}>Your shortlists will appear here after each scout session.</div>
-          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, padding: '10px 20px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, letterSpacing: 1 }}>← BACK</button>
+          <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 36, color: C.textFaint, marginBottom: 16 }}>◌</div>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 600, fontSize: 18, color: C.textMuted, marginBottom: 8 }}>No history yet</div>
+          <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textFaint, marginBottom: 28 }}>Your shortlists will appear here after each scout session.</div>
+          <button onClick={onBack} style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8, padding: '10px 20px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, letterSpacing: 1 }}>← BACK</button>
         </div>
       </div>
     )
@@ -1373,12 +1373,12 @@ function HistoryScreen({ onBack }) {
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
-          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textPrimary }}>Search History</span>
-          <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.textMuted, fontWeight: 600, letterSpacing: 1 }}>← BACK</button>
+          <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textPrimary }}>Search History</span>
+          <button onClick={clearAll} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.red, letterSpacing: 1 }}>CLEAR ALL</button>
         </div>
 
-        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
+        <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1, marginBottom: 16 }}>
           OPEN A SESSION · TAP AGENTS TO SELECT · COMPARE UP TO 4
         </div>
 
@@ -1395,24 +1395,24 @@ function HistoryScreen({ onBack }) {
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 5 }}>
+                  <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textPrimary, fontWeight: 500, lineHeight: 1.4, marginBottom: 5 }}>
                     "{session.query}"
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>{session.date}</span>
-                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: session.saved.length > 0 ? C.lime : C.textFaint }}>
+                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint }}>{session.date}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: session.saved.length > 0 ? C.lime : C.textFaint }}>
                       {session.saved.length} SAVED
                     </span>
                   </div>
                 </div>
-                <span style={{ color: C.textFaint, fontSize: 12, flexShrink: 0, marginTop: 2 }}>{expanded === session.id ? '▲' : '▼'}</span>
+                <span style={{ color: C.textFaint, fontSize: 13, flexShrink: 0, marginTop: 2 }}>{expanded === session.id ? '▲' : '▼'}</span>
               </button>
 
               {/* Expanded agent list */}
               {expanded === session.id && (
                 <div style={{ borderTop: `1px solid ${C.border}`, padding: '10px 16px 14px' }}>
                   {session.saved.length === 0 ? (
-                    <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 12, color: C.textFaint, textAlign: 'center', padding: '8px 0' }}>Nothing shortlisted this session</div>
+                    <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, textAlign: 'center', padding: '8px 0' }}>Nothing shortlisted this session</div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {session.saved.map((agent) => {
@@ -1441,25 +1441,25 @@ function HistoryScreen({ onBack }) {
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                               transition: 'all 0.15s',
                             }}>
-                              {isSel && <span style={{ fontSize: 9, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                              {isSel && <span style={{ fontSize: 11, color: '#0A0A0A', lineHeight: 1, fontWeight: 700 }}>✓</span>}
                             </div>
 
                             <div style={{ width: 32, height: 32, borderRadius: 6, background: C.surface2, border: `1px solid ${C.border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
                               {agent.profilePic
                                 ? <img src={agent.profilePic} alt={agent.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
-                                : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textMuted }}>{agent.name?.[0]}</span>
+                                : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textMuted }}>{agent.name?.[0]}</span>
                               }
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 13, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
-                              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
+                              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: 14, fontWeight: 600, color: C.textPrimary }}>{agent.name}</div>
+                              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.3 }}>{agent.matchInfo?.reason}</div>
                             </div>
                             <a
                               href={agentUrl(agent)}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}
+                              style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, fontWeight: 700, color: '#0A0A0A', background: C.lime, borderRadius: 5, padding: '4px 8px', textDecoration: 'none', flexShrink: 0 }}
                             >VIEW →</a>
                           </div>
                         )
@@ -1483,8 +1483,8 @@ function HistoryScreen({ onBack }) {
         }}>
           <div style={{ width: '100%', maxWidth: 420, display: 'flex', gap: 10, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted }}>{selected.size} SELECTED</div>
-              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textFaint, marginTop: 1 }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted }}>{selected.size} SELECTED</div>
+              <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint, marginTop: 1 }}>
                 {selectedAgents.map((a) => a.name).join(', ')}
               </div>
             </div>
@@ -1493,7 +1493,7 @@ function HistoryScreen({ onBack }) {
               style={{
                 background: C.lime, border: 'none', borderRadius: 8,
                 padding: '12px 24px', cursor: 'pointer',
-                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13,
+                fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14,
                 color: '#0A0A0A', letterSpacing: 1,
               }}
             >
@@ -1504,7 +1504,7 @@ function HistoryScreen({ onBack }) {
               style={{
                 background: 'none', border: `1px solid ${C.border2}`, borderRadius: 8,
                 padding: '12px 14px', cursor: 'pointer',
-                fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted,
+                fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted,
               }}
             >
               CLEAR
@@ -1539,8 +1539,8 @@ function BottomNav({ active, onChange, onHistory }) {
         <div style={{ display: 'flex', width: '100%', maxWidth: 1100, padding: '0 32px', alignItems: 'center', height: 56, justifyContent: 'space-between' }}>
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#0A0A0A', fontWeight: 800 }}>⬡</div>
-            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</span>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#0A0A0A', fontWeight: 800 }}>⬡</div>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</span>
           </div>
           {/* Tabs */}
           <div style={{ display: 'flex', gap: 4 }}>
@@ -1557,8 +1557,8 @@ function BottomNav({ active, onChange, onHistory }) {
                     padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 7,
                   }}
                 >
-                  <span style={{ fontSize: 14, color: isActive ? C.lime : C.textFaint }}>{tab.icon}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
+                  <span style={{ fontSize: 15, color: isActive ? C.lime : C.textFaint }}>{tab.icon}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
                 </button>
               )
             })}
@@ -1568,7 +1568,7 @@ function BottomNav({ active, onChange, onHistory }) {
             {onHistory && (
               <button
                 onClick={onHistory}
-                style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1, transition: 'border-color 0.15s, color 0.15s' }}
+                style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textMuted, letterSpacing: 1, transition: 'border-color 0.15s, color 0.15s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
               >HISTORY</button>
@@ -1598,8 +1598,8 @@ function BottomNav({ active, onChange, onHistory }) {
                 alignItems: 'center', gap: 3,
               }}
             >
-              <span style={{ fontSize: 18, color: isActive ? C.lime : C.textFaint, lineHeight: 1 }}>{tab.icon}</span>
-              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
+              <span style={{ fontSize: 20, color: isActive ? C.lime : C.textFaint, lineHeight: 1 }}>{tab.icon}</span>
+              <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, letterSpacing: 1, color: isActive ? C.lime : C.textFaint, fontWeight: isActive ? 700 : 400 }}>{tab.label}</span>
             </button>
           )
         })}
@@ -1664,17 +1664,17 @@ function MiniAgentCard({ agent, onExpand }) {
           <div style={{ width: 40, height: 40, borderRadius: 8, background: C.surface2, border: `1px solid ${C.border}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {agent.profilePic && !imgError
               ? <img src={agent.profilePic} alt={agent.name} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 16, color: C.textMuted }}>{agent.name?.[0]}</span>
+              : <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 18, color: C.textMuted }}>{agent.name?.[0]}</span>
             }
           </div>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 13, color: C.textPrimary, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
             {agent.name}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700, color: C.textPrimary }}>{fmtMoney(agent.volume ?? agent.grossAgenticAmount)}</span>
-            {trend && <span style={{ fontSize: 10, color: trend === 'up' ? C.green : C.red }}>{trend === 'up' ? '↑' : '↓'}</span>}
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, fontWeight: 700, color: C.textPrimary }}>{fmtMoney(agent.volume ?? agent.grossAgenticAmount)}</span>
+            {trend && <span style={{ fontSize: 12, color: trend === 'up' ? C.green : C.red }}>{trend === 'up' ? '↑' : '↓'}</span>}
           </div>
         </div>
       </div>
@@ -1683,10 +1683,10 @@ function MiniAgentCard({ agent, onExpand }) {
       {profileLoading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${C.border2}`, borderTop: `1.5px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint }}>Loading...</span>
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading...</span>
         </div>
       ) : description ? (
-        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 11, color: C.textMuted, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted, lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
           {description}
         </div>
       ) : null}
@@ -1696,7 +1696,7 @@ function MiniAgentCard({ agent, onExpand }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {offerings.map((o) => (
             <span key={o.id} style={{
-              fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.lime,
+              fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.lime,
               border: `1px solid ${C.lime}33`, borderRadius: 4, padding: '2px 6px',
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140,
             }}>
@@ -1704,7 +1704,7 @@ function MiniAgentCard({ agent, onExpand }) {
             </span>
           ))}
           {(profile?.offerings?.length ?? 0) > 3 && (
-            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 8, color: C.textFaint, padding: '2px 4px' }}>
+            <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint, padding: '2px 4px' }}>
               +{profile.offerings.length - 3} more
             </span>
           )}
@@ -1713,7 +1713,7 @@ function MiniAgentCard({ agent, onExpand }) {
 
       {/* Footer: success rate + view */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
+        <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: agent.successRate > 90 ? C.lime : C.textMuted }}>
           {agent.successRate != null ? `${agent.successRate.toFixed(1)}% success` : ''}
         </span>
         <a
@@ -1723,7 +1723,7 @@ function MiniAgentCard({ agent, onExpand }) {
           onClick={(e) => e.stopPropagation()}
           style={{
             padding: '4px 10px', background: C.lime, borderRadius: 5, textDecoration: 'none',
-            fontFamily: 'JetBrains Mono,monospace', fontSize: 8, fontWeight: 700,
+            fontFamily: 'JetBrains Mono,monospace', fontSize: 10, fontWeight: 700,
             color: '#0A0A0A', letterSpacing: 1,
           }}
         >
@@ -1740,15 +1740,15 @@ function DiscoverSection({ title, subtitle, agents, loading, emptyMsg, onExpand,
     <div style={{ marginBottom: 36 }}>
       <div style={{ padding: isDesktop ? '0 32px' : '0 16px', marginBottom: 14 }}>
         <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: isDesktop ? 18 : 16, color: C.textPrimary, marginBottom: 3 }}>{title}</div>
-        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textMuted }}>{subtitle}</div>
+        <div style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted }}>{subtitle}</div>
       </div>
       {loading ? (
         <div style={{ padding: isDesktop ? '20px 32px' : '20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${C.border2}`, borderTop: `2px solid ${C.lime}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
-          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textFaint }}>Loading...</span>
+          <span style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.textFaint }}>Loading...</span>
         </div>
       ) : agents.length === 0 ? (
-        <div style={{ padding: isDesktop ? '16px 32px' : '16px', fontFamily: 'system-ui,sans-serif', fontSize: 13, color: C.textFaint }}>{emptyMsg}</div>
+        <div style={{ padding: isDesktop ? '16px 32px' : '16px', fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textFaint }}>{emptyMsg}</div>
       ) : isDesktop ? (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, padding: '4px 32px 8px' }}>
           {agents.map((agent) => (
@@ -1886,17 +1886,17 @@ function DiscoverScreen() {
       <div style={{ padding: isDesktop ? '40px 32px 24px' : '24px 16px 16px', maxWidth: isDesktop ? 1100 : 480, margin: '0 auto' }}>
         {!isDesktop && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#0A0A0A' }}>⬡</div>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#0A0A0A' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 9, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
             </div>
           </div>
         )}
         <h2 style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 800, fontSize: isDesktop ? 32 : 24, color: C.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>
           Discover Agents
         </h2>
-        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 14, color: C.textMuted }}>
+        <p style={{ fontFamily: 'system-ui,sans-serif', fontSize: 15, color: C.textMuted }}>
           Trending, new, and personalised picks from the ACP network.
         </p>
       </div>
@@ -2139,7 +2139,7 @@ export default function App() {
           position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
           background: `${C.red}22`, border: `1px solid ${C.red}66`,
           borderRadius: 10, padding: '10px 18px', zIndex: 999,
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.red,
+          fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.red,
           maxWidth: 420, textAlign: 'center',
         }}>
           {error.includes('fetch') || error.includes('CORS') || error.includes('network')
