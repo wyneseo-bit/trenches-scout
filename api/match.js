@@ -34,7 +34,7 @@ Rules:
 - If no "offers" field is present, infer from the name only — and only include it if you are confident.
 - Never pick an agent whose offerings are clearly unrelated (e.g. DeFi swaps for a content request).
 - When two agents match equally well on offerings, prefer the one where isActive is true or lastActive is more recent.
-- Return fewer than 5 if fewer genuinely match — quality over quantity.
+- Return up to 8 matches. Return fewer if fewer genuinely match — quality over quantity.
 
 For the "reason" field you MUST:
 - Name the specific offering(s) from the "offers" field that match the user's need, using the exact offering name as it appears.
