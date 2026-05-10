@@ -2257,11 +2257,11 @@ export default function App() {
     <div style={{ minHeight: '100vh', background: C.bg }}>
       {error && (
         <div style={{
-          position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
-          background: `${C.red}22`, border: `1px solid ${C.red}66`,
-          borderRadius: 10, padding: '10px 18px', zIndex: 999,
-          fontFamily: 'JetBrains Mono,monospace', fontSize: 13, color: C.red,
-          maxWidth: 420, textAlign: 'center',
+          position: 'fixed', top: 68, right: 20, zIndex: 999,
+          background: `${C.red}18`, border: `1px solid ${C.red}55`,
+          borderRadius: 10, padding: '10px 16px',
+          fontFamily: 'JetBrains Mono,monospace', fontSize: 12, color: C.red,
+          maxWidth: 320, textAlign: 'left', lineHeight: 1.5,
         }}>
           {error.includes('fetch') || error.includes('CORS') || error.includes('network')
             ? 'Could not reach ACP network. Check your connection and try again.'
