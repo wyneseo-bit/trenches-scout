@@ -27,19 +27,19 @@ export default async function handler(req, res) {
 
 User's need: "${query}"
 
-Your ONLY job is to find agents whose name clearly suggests they can fulfil the user's specific need. Relevance is everything — do NOT pick an agent just because it sounds popular or has a cool name.
+Each agent below has a name and, where available, an "offers" field listing exactly what services it provides (this is the "What I Offer" section on its profile page). Use the offers field as the primary signal for matching — it is the ground truth of what the agent actually does.
 
 Rules:
-- If the user needs content/social (posts, tweets, writing, X/Twitter growth) → look for agents with words like Content, Social, Tweet, Post, Write, Creator, Media, Marketing in their name. Skip DeFi/trading agents entirely.
-- If the user needs DeFi/trading → look for Swap, Trade, Finance, DeFi, Yield, etc. Skip content agents.
-- If an agent's name gives no clear signal of its function, skip it.
-- Return fewer than 5 if fewer genuinely match — never pad with irrelevant agents.
+- Match on the "offers" field first. If an agent's offerings directly match the user's need, include it.
+- If no "offers" field is present, infer from the name only — and only include it if you are confident.
+- Never pick an agent whose offerings are clearly unrelated (e.g. DeFi swaps for a content request).
+- Return fewer than 5 if fewer genuinely match — quality over quantity.
 
-Available agents (id + name only):
+Available agents:
 ${JSON.stringify(agents)}
 
 Return ONLY a raw JSON array, no markdown:
-[{"id":84,"category":"Content","reason":"one sentence explaining exactly why this agent fits the user's need"},...]
+[{"id":84,"category":"Content","reason":"one sentence referencing the specific offering that matches the user's need"},...]
 
 Valid categories: DeFi, Trading, Content, Social, Analytics, Utility`
 

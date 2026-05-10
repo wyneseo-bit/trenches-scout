@@ -1750,35 +1750,62 @@ export default function App() {
 
   async function fetchAgents() {
     const sortKeys = ['volume', 'revenue', 'successRate']
-    const pages = Array.from({ length: 20 }, (_, i) => i + 1)
-    const results = await Promise.allSettled(
-      sortKeys.flatMap((sortBy) =>
-        pages.map((page) =>
-          fetch(
-            `https://acpx.virtuals.io/api/metrics/agents?page=${page}&pageSize=30&sortBy=${sortBy}&sortOrder=desc`
-          ).then((r) => {
-            if (!r.ok) throw new Error(`ACP API error: ${r.status}`)
-            return r.json()
-          })
+    const metricPages = Array.from({ length: 20 }, (_, i) => i + 1)
+    const profilePages = Array.from({ length: 20 }, (_, i) => i + 1)
+
+    // Fire metrics + rich profile fetches in parallel
+    const [metricsResults, profileResults] = await Promise.all([
+      Promise.allSettled(
+        sortKeys.flatMap((sortBy) =>
+          metricPages.map((page) =>
+            fetch(
+              `https://acpx.virtuals.io/api/metrics/agents?page=${page}&pageSize=30&sortBy=${sortBy}&sortOrder=desc`
+            ).then((r) => {
+              if (!r.ok) throw new Error(`ACP API error: ${r.status}`)
+              return r.json()
+            })
+          )
         )
-      )
-    )
+      ),
+      Promise.allSettled(
+        profilePages.map((page) =>
+          fetch(
+            `https://acpx.virtuals.io/api/agents?pagination[page]=${page}&pagination[pageSize]=100`
+          ).then((r) => r.json())
+        )
+      ),
+    ])
+
+    // Build offerings map: id → "Offering A, Offering B, ..."
+    const offeringsMap = new Map()
+    for (const result of profileResults) {
+      if (result.status !== 'fulfilled') continue
+      const items = result.value?.data ?? []
+      for (const agent of items) {
+        if (agent?.id && agent.offerings?.length) {
+          offeringsMap.set(agent.id, agent.offerings.map((o) => o.name).filter(Boolean).join(', '))
+        }
+      }
+    }
+
+    // Deduplicate metrics agents and attach offerings
     const seen = new Set()
     const all = []
-    for (const result of results) {
+    for (const result of metricsResults) {
       if (result.status !== 'fulfilled') continue
       const res = result.value
-      // handle various response shapes
       const items = Array.isArray(res)
         ? res
         : res.data ?? res.agents ?? res.results ?? res.items ?? res.list ?? []
       for (const agent of items) {
         if (agent?.id != null && !seen.has(agent.id)) {
           seen.add(agent.id)
+          if (offeringsMap.has(agent.id)) agent._offerings = offeringsMap.get(agent.id)
           all.push(agent)
         }
       }
     }
+
     if (all.length === 0) throw new Error('No agents returned from ACP API. The API may be down or blocking requests.')
     return all
   }
@@ -1799,7 +1826,11 @@ export default function App() {
       const allAgents = await fetchAgents()
       setAgents(allAgents)
 
-      const summaries = allAgents.map((a) => ({ id: a.id, name: a.name }))
+      const summaries = allAgents.map((a) => ({
+        id: a.id,
+        name: a.name,
+        ...(a._offerings ? { offers: a._offerings } : {}),
+      }))
 
       const res = await fetch('/api/match', {
         method: 'POST',
