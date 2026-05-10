@@ -2163,36 +2163,6 @@ export default function App() {
     )
   }
 
-  function keywordPreFilter(agents, query) {
-    const STOP = new Set(['the','a','an','i','to','for','my','that','can','and','or','is','in','on','of','with','help','need','want','me','so','get','use','make','have','do','an','be'])
-    const words = query.toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter((w) => w.length > 2 && !STOP.has(w))
-
-    if (words.length === 0) return agents.slice(0, 200)
-
-    const scored = agents.map((a) => {
-      const text = `${a.name} ${a._offerings ?? ''}`.toLowerCase()
-      const score = words.reduce((s, w) => s + (text.includes(w) ? 1 : 0), 0)
-      return { a, score }
-    })
-
-    const matched = scored.filter((x) => x.score > 0).sort((x, y) => y.score - x.score)
-    const result = matched.slice(0, 200).map((x) => x.a)
-
-    // If fewer than 50 keyword matches, pad with top agents by successRate
-    if (result.length < 50) {
-      const usedIds = new Set(result.map((a) => a.id))
-      const extras = agents
-        .filter((a) => !usedIds.has(a.id))
-        .sort((a, b) => (b.successRate ?? 0) - (a.successRate ?? 0))
-        .slice(0, 200 - result.length)
-      return [...result, ...extras]
-    }
-    return result
-  }
-
   async function handleSearch(query) {
     setError(null)
     setCurrentQuery(query)
@@ -2209,14 +2179,10 @@ export default function App() {
       const allAgents = await fetchAgents()
       setAgents(allAgents)
 
-      // 1. Quality gate — remove dead/inactive agents
       const qualified = qualityFilter(allAgents)
 
-      // 2. Keyword pre-filter — narrow to top 200 most relevant candidates
-      const candidates = keywordPreFilter(qualified, query)
-
       const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
-      const summaries = candidates.map((a) => ({
+      const summaries = qualified.map((a) => ({
         id: a.id,
         name: a.name,
         ...(a._offerings ? { offers: a._offerings } : {}),
