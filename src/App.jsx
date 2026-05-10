@@ -640,7 +640,7 @@ function SearchScreen({ onSearch, onHistory }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#0A0A0A' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHFINDER</div>
               <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>ACP EXPLORER · LIVE DATA</div>
             </div>
           </div>
@@ -1145,7 +1145,7 @@ function DoneScreen({ saved, query, onRestart, onHistory }) {
             fontSize: 18, color: '#0A0A0A',
           }}>⬡</div>
           <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>
-            TRENCHES SCOUT
+            TRENCHFINDER
           </span>
         </div>
 
@@ -1325,7 +1325,7 @@ const MOCK_MATCHES = [
 ]
 
 // ─── History helpers ──────────────────────────────────────────────────────────
-const HISTORY_KEY = 'trenches_scout_history'
+const HISTORY_KEY = 'trenchfinder_history'
 
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? [] } catch { return [] }
@@ -1628,7 +1628,7 @@ function BottomNav({ active, onChange, onHistory }) {
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#0A0A0A', fontWeight: 800 }}>⬡</div>
-            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</span>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 14, color: C.textPrimary, letterSpacing: 1 }}>TRENCHFINDER</span>
           </div>
           {/* Tabs */}
           <div style={{ display: 'flex', gap: 4 }}>
@@ -1968,7 +1968,7 @@ function DiscoverScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#0A0A0A' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHES SCOUT</div>
+              <div style={{ fontFamily: 'Inter,system-ui,sans-serif', fontWeight: 700, fontSize: 15, color: C.textPrimary, letterSpacing: 1 }}>TRENCHFINDER</div>
               <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: C.textFaint, letterSpacing: 1 }}>DISCOVER · LIVE DATA</div>
             </div>
           </div>

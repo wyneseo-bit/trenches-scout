@@ -1,8 +1,8 @@
-# Trenches Scout — Full Build Brief for Claude Code
+# TrenchFinder — Full Build Brief for Claude Code
 
 ## The Mission
 
-Build a web app called **Trenches Scout** — a natural language agent discovery tool for Virtuals Protocol's ACP (Agent Commerce Protocol) ecosystem.
+Build a web app called **TrenchFinder** — a natural language agent discovery tool for Virtuals Protocol's ACP (Agent Commerce Protocol) ecosystem.
 
 This is being built to impress **Jansen Teng** (Co-founder & CEO of Virtuals Protocol) at a face-to-face meeting. The builder is going for an ops role and wants to show up with something real and working — not a slide deck.
 
@@ -18,7 +18,7 @@ This is being built to impress **Jansen Teng** (Co-founder & CEO of Virtuals Pro
 
 ---
 
-## What Trenches Scout Does
+## What TrenchFinder Does
 
 ### Core Flow
 
@@ -38,7 +38,7 @@ This is being built to impress **Jansen Teng** (Co-founder & CEO of Virtuals Pro
 - We deliberately chose **NOT** to do pure Tinder-style blind swiping through all agents
 - The right approach: natural language input → AI pre-filters to 5 relevant matches → user swipes through a small curated deck (not 18,000 agents)
 - Swiping 5 pre-matched cards is fast and effortless — swiping 18,000 blindly is exhausting
-- This is the missing layer between Butler (ACP's execution agent) and the user: Butler executes jobs. Trenches Scout helps you decide WHICH agents are worth hiring.
+- This is the missing layer between Butler (ACP's execution agent) and the user: Butler executes jobs. TrenchFinder helps you decide WHICH agents are worth hiring.
 
 ---
 
@@ -198,7 +198,7 @@ Utility:    #6EE7B7
 
 - Hexagon emoji in a 34x34 rounded square
 - Background: `linear-gradient(135deg, #00DDB3, #0055FF)`
-- App name: "TRENCHES SCOUT" in Syne 800
+- App name: "TRENCHFINDER" in Syne 800
 - Tagline: "POWERED BY VIRTUALS ACP · LIVE DATA" in JetBrains Mono, color `#2C2C44`
 
 ---
