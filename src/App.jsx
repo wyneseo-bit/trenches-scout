@@ -942,7 +942,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
 
         {/* Comparison columns */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: isDesktop ? 'hidden' : 'auto' }}>
-          <div style={{ display: 'flex', minWidth: isDesktop ? '100%' : agents.length * colWidth, paddingBottom: 40 }}>
+          <div style={{ display: 'flex', justifyContent: isDesktop ? 'center' : 'flex-start', minWidth: isDesktop ? 'unset' : agents.length * colWidth, paddingBottom: 40 }}>
             {agents.map((agent, idx) => {
               const rich = profiles[agent.id] ?? {}
               const metricsData = rich.metrics ?? {}
@@ -955,8 +955,7 @@ function CompareModal({ agents, matchInfoMap = {}, onClose }) {
                 <div
                   key={agent.id}
                   style={{
-                    flex: isDesktop ? 1 : `0 0 ${colWidth}px`,
-                    minWidth: isDesktop ? 0 : colWidth,
+                    flex: `0 0 ${isDesktop ? Math.min(320, Math.floor((Math.min(window.innerWidth, 1200) - 64) / agents.length)) : colWidth}px`,
                     borderRight: idx < agents.length - 1 ? `1px solid ${C.border}` : 'none',
                     padding: isDesktop ? '24px 20px' : '20px 14px',
                   }}
@@ -1514,7 +1513,7 @@ function HistoryScreen({ onBack }) {
 }
 
 // ─── Tab nav — bottom on mobile, top bar on desktop ──────────────────────────
-function BottomNav({ active, onChange }) {
+function BottomNav({ active, onChange, onHistory }) {
   const isDesktop = useIsDesktop()
   const tabs = [
     { id: 'search',   label: 'SCOUT',    icon: '⌕' },
@@ -1556,8 +1555,17 @@ function BottomNav({ active, onChange }) {
               )
             })}
           </div>
-          {/* Right slot — empty placeholder for balance */}
-          <div style={{ width: 150 }} />
+          {/* Right slot — history */}
+          <div style={{ width: 150, display: 'flex', justifyContent: 'flex-end' }}>
+            {onHistory && (
+              <button
+                onClick={onHistory}
+                style={{ background: 'none', border: `1px solid ${C.border2}`, borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontFamily: 'JetBrains Mono,monospace', fontSize: 10, color: C.textMuted, letterSpacing: 1, transition: 'border-color 0.15s, color 0.15s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lime; e.currentTarget.style.color = C.lime }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.color = C.textMuted }}
+              >HISTORY</button>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -2038,6 +2046,7 @@ export default function App() {
         <BottomNav
           active={screen === 'discover' ? 'discover' : 'search'}
           onChange={(tab) => setScreen(tab)}
+          onHistory={() => setScreen('history')}
         />
       )}
     </div>
