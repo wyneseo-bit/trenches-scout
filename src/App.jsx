@@ -2038,6 +2038,20 @@ export default function App() {
   const [currentQuery, setCurrentQuery] = useState('')
   const [error, setError] = useState(null)
 
+  // Dismiss error on any click, keypress, or tab change
+  useEffect(() => {
+    if (!error) return
+    const dismiss = () => setError(null)
+    document.addEventListener('click', dismiss)
+    document.addEventListener('keydown', dismiss)
+    return () => {
+      document.removeEventListener('click', dismiss)
+      document.removeEventListener('keydown', dismiss)
+    }
+  }, [error])
+
+  useEffect(() => { setError(null) }, [screen])
+
   async function fetchAgents() {
     const sortKeys = ['volume', 'revenue', 'successRate']
     const metricPages = Array.from({ length: 20 }, (_, i) => i + 1)
